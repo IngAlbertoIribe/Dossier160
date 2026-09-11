@@ -1,5 +1,4 @@
-
-    // ==========================================
+// ==========================================
     // CUESTIONARIO ORDENADO Y OPTIMIZADO
     // ==========================================
     const cuestionarioDS160 = [
@@ -12,12 +11,12 @@
         { categoria: "PERSONAL", id: "nombre_esposo", pregunta: "NOMBRE COMPLETO DE SU ESPOSO(A) / EX-ESPOSO(A):", tip: "⚠️ OBLIGATORIO: Nombre completo con apellidos.", tipo: "text" },
         { categoria: "PERSONAL", id: "fecha_esposo", pregunta: "FECHA DE NACIMIENTO DE SU ESPOSO(A):", tip: "Abre el calendario y selecciona la fecha exacta.", tipo: "date" },
         { categoria: "PERSONAL", id: "lugar_esposo", pregunta: "LUGAR DE NACIMIENTO DE SU ESPOSO(A):", tip: "Ej. Ciudad Valles, San Luis Potosí.", tipo: "text" },
-        { categoria: "PERSONAL", id: "datos_hijos", pregunta: "¿TIENE HIJOS? (NOMBRES Y FECHAS DE NACIMIENTO):", tip: "Captura nombres completos y fechas. Si no tienes hijos, escribe 'Ninguno'.", tipo: "textarea" },
+        { categoria: "PERSONAL", id: "datos_hijos", pregunta: "¿TIENE HIJOS?", tip: "Si tienes, captura nombres completos y fechas de nacimiento.", tipo: "sino_texto" },
         
         { categoria: "PERSONAL", id: "municipio_nacimiento", pregunta: "MUNICIPIO DE NACIMIENTO:", tip: "Verifica en tu acta de nacimiento.", tipo: "text" },
-        { categoria: "PERSONAL", id: "otra_nacionalidad", pregunta: "¿TIENES ALGUNA OTRA NACIONALIDAD?", tip: "Si es Sí, especifica cuál.", tipo: "text" },
+        { categoria: "PERSONAL", id: "otra_nacionalidad", pregunta: "¿TIENES ALGUNA OTRA NACIONALIDAD?", tip: "Si respondes Sí, especifica cuál.", tipo: "sino_texto" },
         { categoria: "PERSONAL", id: "historial_previo_eu", pregunta: "¿HA VIAJADO A EE.UU. ANTERIORMENTE O HA TENIDO UNA VISA?", tip: "Si eliges 'No', omitiremos automáticamente preguntas sobre SSN, visas previas y licencias.", tipo: "select", opciones: ["Sí, he viajado o he tenido visa", "No, nunca he ido y es mi primera visa"] },
-        { categoria: "PERSONAL", id: "ssn_tax_id", pregunta: "EN EE.UU. ¿CUENTAS CON SEGURO SOCIAL, TAX O ID?", tip: "Si no tienes, escribe 'NO'.", tipo: "text" },
+        { categoria: "PERSONAL", id: "ssn_tax_id", pregunta: "EN EE.UU. ¿CUENTAS CON SEGURO SOCIAL, TAX O ID?", tip: "Si respondes Sí, anota el número.", tipo: "sino_texto" },
 
         { categoria: "PERSONAL", id: "direccion_completa", pregunta: "DIRECCIÓN COMPLETA:", tip: "Ingresa tu Código Postal para buscar tu colonia.", tipo: "direccion_mx" },
         { categoria: "PERSONAL", id: "telefonos", pregunta: "TELÉFONO DE CASA Y CELULAR:", tip: "Números donde puedan localizarte actualmente.", tipo: "text" },
@@ -25,7 +24,7 @@
         // --- MEJORA: REDES SOCIALES ---
         { categoria: "PERSONAL", id: "redes_sociales", pregunta: "REDES SOCIALES (FACEBOOK, INSTAGRAM, ETC):", tip: "⚠️ IMPORTANTE: Escribe tu usuario exacto o enlace (Ej. facebook.com/juanperez), no solo 'Face' o 'Insta'. El consulado verifica estas cuentas.", tipo: "textarea" },
         
-        { categoria: "PERSONAL", id: "historial_contacto", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HAS USADO OTROS TELÉFONOS/EMAILS?", tip: "Anótalos si es el caso, o pon NO.", tipo: "textarea" },
+        { categoria: "PERSONAL", id: "historial_contacto", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HAS USADO OTROS TELÉFONOS/EMAILS?", tip: "Si respondes Sí, anótalos detalladamente.", tipo: "sino_texto" },
         
         // --- MEJORA: DATOS DE PADRES ---
         { categoria: "PERSONAL", id: "datos_padres", pregunta: "NOMBRE Y FECHA DE NACIMIENTO DE SU PADRE Y MADRE:", tip: "⚠️ OBLIGATORIO: Nombres completos (con apellidos) y fechas de nacimiento de AMBOS (padre y madre). Aunque hayan fallecido o no tengas relación con ellos.", tipo: "textarea" },
@@ -35,43 +34,43 @@
 
         // --- SECCIÓN 2: PROFESIONAL ---
         { categoria: "PROFESIONAL", id: "educacion_completa", pregunta: "INFORMACIÓN ACADÉMICA:", tip: "Captura tu nivel, tu especialidad y tus instituciones en este formato.", tipo: "educacion_combo" },
-        { categoria: "PROFESIONAL", id: "ocupacion", pregunta: "OCUPACIÓN PRINCIPAL O PUESTO ACTUAL:", tip: "Ej. Desarrollador Senior, Estudiante, Ama de casa.", tipo: "text" },
+        { categoria: "PROFESIONAL", id: "ocupacion", pregunta: "OCUPACIÓN PRINCIPAL O PUESTO ACTUAL:", tip: "Ej. Vendedor, Estudiante, Ama de casa.", tipo: "text" },
         { categoria: "PROFESIONAL", id: "anos_experiencia", pregunta: "¿CUÁNTOS AÑOS DE EXPERIENCIA TIENE EN SU PROFESIÓN/OFICIO?", tip: "Escribe solo el número de años ejerciendo. Ej. 10", tipo: "number" },
         { categoria: "PROFESIONAL", id: "sueldo", pregunta: "SUELDO MENSUAL SIN DEDUCCIONES (BRUTO):", tip: "Debe coincidir con tus recibos de nómina.", tipo: "text" },
         { categoria: "PROFESIONAL", id: "empresa_actual", pregunta: "EMPRESA O INSTITUCIÓN DONDE LABORA/ESTUDIA:", tip: "Nombre, Fecha de ingreso y Teléfono.", tipo: "textarea" },
         { categoria: "PROFESIONAL", id: "antiguedad_empleo", pregunta: "¿QUÉ ANTIGÜEDAD TIENE EN SU EMPLEO ACTUAL? (EN AÑOS):", tip: "Especifica solo el número de años. Ej. 5", tipo: "number" },
         
         // --- MEJORA: FUNCIONES DE TRABAJO ---
-        { categoria: "PROFESIONAL", id: "funciones_trabajo", pregunta: "DESCRIBA BREVEMENTE SUS FUNCIONES:", tip: "Usa oraciones completas y claras. Ej. 'Desarrollo y mantenimiento de software para la empresa'. Evita usar solo palabras sueltas.", tipo: "textarea" },
+        { categoria: "PROFESIONAL", id: "funciones_trabajo", pregunta: "DESCRIBA BREVEMENTE SUS FUNCIONES:", tip: "Usa oraciones completas y claras. Ej. 'Mantenimiento de tiendas para la empresa'. Evita usar solo palabras sueltas.", tipo: "textarea" },
         
         { categoria: "PROFESIONAL", id: "direccion_empresa", pregunta: "DIRECCIÓN COMPLETA DE TRABAJO Ó ESCUELA:", tip: "Calle, número, colonia, ciudad y estado.", tipo: "textarea" },
-        { categoria: "PROFESIONAL", id: "empleos_anteriores", pregunta: "MENCIONE SUS ÚLTIMOS 2 EMPLEOS (Si tiene menos de 5 años en el actual):", tip: "Empresa, dirección, tel, cargo, jefe y fechas.", tipo: "textarea" },
-        { categoria: "PROFESIONAL", id: "organizaciones", pregunta: "¿PERTENECE A UNA ORGANIZACIÓN SOCIAL O PROFESIONAL?:", tip: "Colegios, sindicatos, etc.", tipo: "text" },
+        { categoria: "PROFESIONAL", id: "empleos_anteriores", pregunta: "MENCIONE SUS ÚLTIMOS 2 EMPLEOS:", tip: "Empresa, dirección, tel, cargo, jefe y fechas.", tipo: "textarea" },
+        { categoria: "PROFESIONAL", id: "organizaciones", pregunta: "¿PERTENECE A UNA ORGANIZACIÓN SOCIAL O PROFESIONAL?:", tip: "Colegios, sindicatos, etc.", tipo: "sino_texto" },
         
         // --- MEJORA: PROPIEDADES ---
-        { categoria: "PROFESIONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Si tienes, especifica qué son. Ej. 'Casa propia en Mazatlán y 1 vehículo'. Esto le demuestra al Cónsul tu arraigo económico en México.", tipo: "textarea" },
+        { categoria: "PROFESIONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia en mi ciudad y 1 vehículo'. Esto demuestra tu arraigo económico al pais.", tipo: "sino_texto" },
 
         // --- SECCIÓN 3: CONSULADO Y VIAJE ---
         { categoria: "CONSULADO Y VIAJE", id: "motivo_visita", pregunta: "¿CUÁL ES EL MOTIVO PRINCIPAL DE SU VIAJE A EE.UU.?", tip: "Sé muy específico. Ej. 'Hacer turismo y compras en McAllen'.", tipo: "textarea" },
         { categoria: "CONSULADO Y VIAJE", id: "lugar_pasaporte", pregunta: "LUGAR DE EMISIÓN DE SU PASAPORTE:", tip: "Revisa la página principal de tu pasaporte.", tipo: "text" },
-        { categoria: "CONSULADO Y VIAJE", id: "robo_pasaporte", pregunta: "¿ALGUNA VEZ LE HAN ROBADO/EXTRAVIADO UN PASAPORTE?", tip: "Si respondes Sí, especifica en qué año fue.", tipo: "text" },
+        { categoria: "CONSULADO Y VIAJE", id: "robo_pasaporte", pregunta: "¿ALGUNA VEZ LE HAN ROBADO/EXTRAVIADO UN PASAPORTE?", tip: "Si respondes Sí, especifica en qué año fue y detalles.", tipo: "sino_texto" },
         { categoria: "CONSULADO Y VIAJE", id: "fecha_viaje", pregunta: "FECHA APROXIMADA PARA VIAJAR A EE.UU.:", tip: "Abre el calendario y pon una fecha futura.", tipo: "date" },
         { categoria: "CONSULADO Y VIAJE", id: "tiempo_estadía", pregunta: "TIEMPO QUE PERMANECERÁ EN EE.UU.:", tip: "Ejemplo: 1 semana, 15 días.", tipo: "text" },
         { categoria: "CONSULADO Y VIAJE", id: "hospedaje", pregunta: "LUGAR DE HOSPEDAJE EN EE.UU.:", tip: "Nombre y Dirección del familiar, o nombre del Hotel.", tipo: "textarea" },
         { categoria: "CONSULADO Y VIAJE", id: "quien_paga", pregunta: "QUIÉN CUBRE LOS GASTOS DE SU VIAJE:", tip: "Nombre, parentesco y teléfono de quien paga (o 'Yo mismo').", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "acompanantes", pregunta: "PERSONAS QUE VIAJAN CON USTED:", tip: "Nombre y Parentesco. Si viajas solo, pon 'Ninguno'.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "familiares_cercanos_eu", pregunta: "¿TIENE ESPOSO(A), PADRES, HERMANOS O HIJOS EN EE.UU.?", tip: "Nombre completo y Estatus Migratorio.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "otros_familiares_eu", pregunta: "¿TIENE ALGÚN OTRO FAMILIAR VIVIENDO LEGALMENTE EN EE.UU.?", tip: "Tíos, primos, etc. (Solo legales).", tipo: "textarea" },
+        { categoria: "CONSULADO Y VIAJE", id: "acompanantes", pregunta: "¿HAY PERSONAS QUE VIAJAN CON USTED?", tip: "Si viajas con alguien, anota su nombre y parentesco.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "familiares_cercanos_eu", pregunta: "¿TIENE ESPOSO(A), PADRES, HERMANOS O HIJOS EN EE.UU.?", tip: "Nombre completo y Estatus Migratorio.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "otros_familiares_eu", pregunta: "¿TIENE ALGÚN OTRO FAMILIAR VIVIENDO LEGALMENTE EN EE.UU.?", tip: "Tíos, primos, etc. (Solo legales).", tipo: "sino_texto" },
 
         // --- ESTAS SE OMITIRÁN SI NUNCA HA VIAJADO A EU ---
-        { categoria: "CONSULADO Y VIAJE", id: "visitas_anteriores", pregunta: "¿HA ESTADO ALGUNA VEZ EN EE.UU.? (FECHAS):", tip: "Revisa los sellos de tu pasaporte anterior.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "licencia_eu", pregunta: "¿TIENE UNA LICENCIA DE CONDUCIR DE EE.UU.?:", tip: "Si tienes, anota el número. Si no, escribe 'NO'.", tipo: "text" },
-        { categoria: "CONSULADO Y VIAJE", id: "visas_anteriores", pregunta: "¿ALGUNA VEZ LE HAN OTORGADO UNA VISA?:", tip: "Fecha de emisión y si te tomaron huellas.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "visa_robada", pregunta: "¿ALGUNA VEZ LE ROBARON, EXTRAVIÓ O REVOCARON UNA VISA?:", tip: "Explica brevemente y pon el año.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "problemas_legales_eu", pregunta: "¿ALGUNA VEZ HA SIDO DEPORTADO, NEGADO ENTRADA O IDO A JUICIO EN EE.UU.?", tip: "Sé 100% honesto.", tipo: "textarea" },
+        { categoria: "CONSULADO Y VIAJE", id: "visitas_anteriores", pregunta: "¿HA ESTADO ALGUNA VEZ EN EE.UU.? (FECHAS):", tip: "Revisa los sellos de tu pasaporte anterior.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "licencia_eu", pregunta: "¿TIENE UNA LICENCIA DE CONDUCIR DE EE.UU.?:", tip: "Si tienes, anota el número.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "visas_anteriores", pregunta: "¿ALGUNA VEZ LE HAN OTORGADO UNA VISA?:", tip: "Fecha de emisión y si te tomaron huellas.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "visa_robada", pregunta: "¿ALGUNA VEZ LE ROBARON, EXTRAVIÓ O REVOCARON UNA VISA?:", tip: "Explica brevemente y pon el año.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "problemas_legales_eu", pregunta: "¿ALGUNA VEZ HA SIDO DEPORTADO, NEGADO ENTRADA O IDO A JUICIO EN EE.UU.?", tip: "Sé 100% honesto.", tipo: "sino_texto" },
         
-        { categoria: "CONSULADO Y VIAJE", id: "viajes_internacionales", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿A QUÉ PAÍSES HA VIAJADO?:", tip: "Si no has salido de México, escribe 'Ninguno'.", tipo: "textarea" },
-        { categoria: "CONSULADO Y VIAJE", id: "seguridad", pregunta: "¿EXPERIENCIA EN ARMAS DE FUEGO O HA SERVIDO AL EJÉRCITO?:", tip: "Si no, escribe 'NO'.", tipo: "textarea" }
+        { categoria: "CONSULADO Y VIAJE", id: "viajes_internacionales", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿A HA VIAJADO A OTRO PAIS?:", tip: "Menciona los países. Si es ninguno pon NO.", tipo: "sino_texto" },
+        { categoria: "CONSULADO Y VIAJE", id: "seguridad", pregunta: "¿TIENE EXPERIENCIA EN ARMAS DE FUEGO O HA SERVIDO AL EJÉRCITO?:", tip: "Si respondes Sí, detalla tu experiencia.", tipo: "sino_texto" }
     ];
 
     const PREGUNTAS_A_OMITIR = ['ssn_tax_id', 'visitas_anteriores', 'licencia_eu', 'visas_anteriores', 'visa_robada', 'problemas_legales_eu'];
@@ -92,8 +91,19 @@
     function debeOmitirse(idx) {
         if(idx < 0 || idx >= cuestionarioDS160.length) return false;
         let q = cuestionarioDS160[idx];
+        
+        // Regla 1: Primera vez que viaja
         if (appData.respuestas_ds160['historial_previo_eu'] === 'No, nunca he ido y es mi primera visa' && PREGUNTAS_A_OMITIR.includes(q.id)) return true;
+        
+        // Regla 2: Solteros
         if (appData.respuestas_ds160['estado_civil'] === 'Soltero(a)' && PREGUNTAS_ESPOSO.includes(q.id)) return true;
+        
+        // Regla 3: Más de 5 años de antigüedad, omite empleos anteriores
+        if (q.id === 'empleos_anteriores') {
+            let antiguedad = parseInt(appData.respuestas_ds160['antiguedad_empleo']);
+            if (!isNaN(antiguedad) && antiguedad >= 5) return true;
+        }
+
         return false;
     }
 
@@ -105,7 +115,7 @@
         document.getElementById('progressBar').style.width = ((progresoReal / TOTAL_PASOS) * 100) + "%";
 
         switch(step) {
-            case 0: html = `<h3>¡Bienvenido!</h3><p>Captura tu información paso a paso.</p><button onclick="guardarDato('pais', 'USA', 1)">Iniciar Expediente</button>`; break;
+            case 0: html = `<h3>¡Bienvenido!</h3><p>Captura tu información paso a paso.</p><button onclick="guardarDato('pais', 'USA', 1)">Iniciar Trámite </button>`; break;
             case 1: html = `<h3>Paso 1: Pasaporte</h3><p>¿Ya cuentas con tu pasaporte vigente?</p><button onclick="avanzarPaso(2)">Sí, ya lo tengo</button><button onclick="avanzarPaso(3)" class="secondary">No, aún no</button>`; break;
             case 2: html = `<h3>¡Excelente!</h3><p>Captura el folio de tu pasaporte:</p><input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}"><button onclick="guardarInputGeneral('folio_pasaporte', 'inputFolio', 4)">Guardar Folio</button>`; break;
             case 3: html = `<h3>Paso Pendiente</h3><p>Es indispensable contar con tu pasaporte.</p><div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te sugerimos buscar una agencia de confianza para que te asesoren con tu pasaporte.</div><p>Regresa cuando lo tengas.</p><button onclick="avanzarPaso(2)">¡Ya lo tengo!</button>`; break;
@@ -119,28 +129,56 @@
                 let respuestaPrevia = appData.respuestas_ds160[q.id] || "";
 
                 html = `<p style="text-transform: uppercase; font-size: 13px; color: #666; margin-bottom:0; font-weight:bold;">DS-160: Pregunta ${idx + 1} de ${cuestionarioDS160.length}</p>
-                        <p style="color: #00d1b2; font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria}</p>
+                        <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria}</p>
                         <h3 style="text-align: left; margin-top:5px;">${q.pregunta}</h3>`;
 
                 if (q.tipo === "direccion_mx") {
                     html += `
-                        <div class="cp-container"><label>1. Código Postal:</label><div class="cp-row"><input type="number" id="cp_input" placeholder="Ej. 82180" onkeyup="if(this.value.length === 5) buscarCP()"><button type="button" class="btn-buscar" onclick="buscarCP()">Buscar</button></div>
-                        <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. Calle #1"></div>
-                        ${respuestaPrevia ? `<p style="font-size:13px; color:#0d47a1;"><b>Guardado:</b><br>${respuestaPrevia}</p>` : ''}</div>`;
+                        <div class="cp-container"><label>1. Código Postal:</label><div class="cp-row"><input type="number" id="cp_input" placeholder="Ej. 80000" onkeyup="if(this.value.length === 5) buscarCP()"><button type="button" class="btn-buscar" onclick="buscarCP()">Buscar</button></div>
+                        <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. Calle 123"></div>
+                        ${respuestaPrevia ? `<p style="font-size:13px; color:var(--color-primario);"><b>Guardado:</b><br>${respuestaPrevia}</p>` : ''}</div>`;
                 } 
                 else if (q.tipo === "educacion_combo") {
                     let datosEdu = {nivel: "", especialidad: "", escuelas: ""};
                     if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { datosEdu = JSON.parse(respuestaPrevia); } catch(e){} }
+                    
+                    let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado"].includes(datosEdu.nivel);
+
                     html += `
                         <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nivel de Estudios:</label>
-                        <select id="edu_nivel" style="margin-top:5px; margin-bottom:15px;">
+                        <select id="edu_nivel" style="margin-top:5px; margin-bottom:15px;" onchange="
+                            let req = ['Carrera Técnica', 'Licenciatura / Ingeniería', 'Maestría', 'Doctorado'].includes(this.value);
+                            document.getElementById('div_especialidad').style.display = req ? 'block' : 'none';
+                        ">
                             <option value="">Selecciona una opción...</option>
                             ${["Primaria", "Secundaria", "Preparatoria / Bachillerato", "Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Ninguno"].map(o => `<option value="${o}" ${datosEdu.nivel === o ? 'selected':''}>${o}</option>`).join('')}
                         </select>
-                        <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">2. Especialidad / Carrera (Si aplica):</label>
-                        <input type="text" id="edu_especialidad" value="${datosEdu.especialidad}" placeholder="Ej. Ing. en Sistemas (o 'No aplica')">
+                        
+                        <div id="div_especialidad" style="display: ${requiereEspecialidad ? 'block' : 'none'};">
+                            <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block; color: var(--color-primario);">2. Especialidad / Carrera:</label>
+                            <input type="text" id="edu_especialidad" value="${datosEdu.especialidad && datosEdu.especialidad !== 'No aplica' ? datosEdu.especialidad : ''}" placeholder="Ej. Ing. en Sistemas">
+                        </div>
+
                         <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">3. Instituciones a las que asistió:</label>
                         <textarea id="edu_escuelas" placeholder="Nombre de la escuela, domicilio completo y fechas...">${datosEdu.escuelas}</textarea>`;
+                }
+                // --- NUEVO TIPO: SÍ/NO CON TEXTO OCULTO ---
+                else if (q.tipo === "sino_texto") {
+                    let isSi = respuestaPrevia.startsWith("Sí");
+                    let detalle = isSi ? respuestaPrevia.replace("Sí: ", "") : "";
+                    let isNo = respuestaPrevia === "No";
+                    
+                    html += `
+                        <select id="respuestaDS160_sino" onchange="document.getElementById('div_detalle').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                            <option value="">Selecciona una opción...</option>
+                            <option value="Sí" ${isSi ? 'selected' : ''}>Sí</option>
+                            <option value="No" ${isNo ? 'selected' : ''}>No</option>
+                        </select>
+                        <div id="div_detalle" style="display: ${isSi ? 'block' : 'none'}; margin-top: 10px; text-align: left;">
+                            <label style="font-size:14px; font-weight:bold; display:block; color: var(--color-primario);">Especifique los detalles requeridos:</label>
+                            <textarea id="respuestaDS160_detalle" placeholder="Escriba todos los detalles aquí...">${detalle}</textarea>
+                        </div>
+                    `;
                 }
                 else if (q.tipo === "select") {
                     html += `<select id="respuestaDS160"><option value="">Selecciona una opción...</option>${q.opciones.map(opt => `<option value="${opt}" ${respuestaPrevia === opt ? 'selected' : ''}>${opt}</option>`).join('')}</select>`;
@@ -164,7 +202,7 @@
             case 12: html = `<div class="agency-box"><strong>🤝 Recomendación:</strong><br>Una agencia de trámites local puede ayudarte a monitorear y adelantar tus citas de forma segura.</div><p>Regresa cuando tengas tus fechas listas.</p><button onclick="avanzarPaso(11)">¡Ya agendé!</button><button onclick="avanzarPaso(13)" class="secondary">Finalizar trámite sin cita</button>`; break;
             case 13: 
                 html = `
-                    <h3>¡Trámite Completo! 🏆🎉</h3>
+                    <h3 style="color: var(--color-primario);">¡Trámite Completo! 🏆🎉</h3>
                     <p>Tienes toda la información lista para tu visa.</p>
                     
                     <div class="interview-tips">
@@ -176,6 +214,7 @@
                     </div>
 
                     <button class="success" onclick="mostrarResumen()">Ver mi Expediente y Compartir</button>
+                    <button class="secondary" onclick="regresarAUltimaPregunta()" style="margin-top: 10px;">✏️ Editar última pregunta</button>
                 `; 
                 break;
         }
@@ -203,29 +242,62 @@
 
     function guardarDato(l, v, p) { appData[l] = v; avanzarPaso(p); }
     function guardarInputGeneral(l, id, p) { 
-        let val = document.getElementById(id).value;
+        let val = document.getElementById(id).value.trim();
         if(!val) { mostrarAlerta("Por favor, ingresa el dato solicitado."); return; }
         appData[l] = val; avanzarPaso(p); 
     }
     
     function guardarRespuestaDS160(id, tipo) {
         let v = "";
+        
+        // --- GUARDADO: DIRECCIÓN MX ---
         if(tipo === "direccion_mx") {
-            let cp=document.getElementById('cp_input').value, ca=document.getElementById('calle_input').value, co=document.getElementById('colonia_select').value;
+            let cp=document.getElementById('cp_input').value.trim(), ca=document.getElementById('calle_input').value.trim(), co=document.getElementById('colonia_select').value;
             if(!ca || !cp) { mostrarAlerta("Busca tu Código Postal y escribe tu calle para continuar."); return; }
+            if(ca.length < 3) { mostrarAlerta("La calle debe ser más descriptiva."); return; }
             v = `${ca}, Col. ${co}, C.P. ${cp}`;
         } 
+        // --- GUARDADO: EDUCACIÓN COMBO ---
         else if(tipo === "educacion_combo") {
             let n = document.getElementById('edu_nivel').value;
-            let e = document.getElementById('edu_especialidad').value;
-            let esc = document.getElementById('edu_escuelas').value;
+            let esc = document.getElementById('edu_escuelas').value.trim();
+            
+            // Evaluamos si necesita especialidad según el nivel elegido
+            let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado"].includes(n);
+            let e = requiereEspecialidad ? document.getElementById('edu_especialidad').value.trim() : "No aplica";
+
             if(!n || !esc) { mostrarAlerta("Por favor completa el Nivel de Estudios y las Instituciones."); return; }
+            if(requiereEspecialidad && e.length < 3) { mostrarAlerta("Por favor especifica tu Especialidad o Carrera."); return; }
+
             v = JSON.stringify({nivel: n, especialidad: e, escuelas: esc});
         }
+        // --- GUARDADO: SÍ / NO CON TEXTO ---
+        else if(tipo === "sino_texto") {
+            let sino = document.getElementById('respuestaDS160_sino').value;
+            if(!sino) { mostrarAlerta("Por favor, selecciona Sí o No."); return; }
+            
+            if(sino === "Sí") {
+                let detalle = document.getElementById('respuestaDS160_detalle').value.trim();
+                if(detalle.length < 3) { 
+                    mostrarAlerta("Seleccionaste 'Sí'. Por favor especifica los detalles requeridos de forma clara."); 
+                    return; 
+                }
+                v = `Sí: ${detalle}`;
+            } else {
+                v = "No";
+            }
+        }
+        // --- GUARDADO: INPUTS NORMALES (TEXT, DATE, EMAIL, SELECT) ---
         else {
-            v = document.getElementById('respuestaDS160').value;
+            v = document.getElementById('respuestaDS160').value.trim();
             if(!v) { mostrarAlerta("Escribe o selecciona una respuesta para continuar."); return; }
             
+            // VALIDACIÓN ANTIPEREZA: Evita que pongan "x", "a", o "ok" en cajas de texto libre
+            if((tipo === "text" || tipo === "textarea") && v.length < 3) {
+                mostrarAlerta("Tu respuesta es muy corta. Por favor proporciona información más detallada y real.");
+                return;
+            }
+
             if(tipo === "email") {
                 let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if(!re.test(v)) { mostrarAlerta("El correo electrónico no es válido. Verifica que tenga un '@' y un dominio."); return; }
@@ -245,6 +317,8 @@
         appData.respuestas_ds160[id] = v; 
         appData.ds160_index++; 
         
+        // Al avanzar, nos aseguramos de brincarnos las condicionales si aplican.
+        // Si el usuario vino de un botón de "Editar", esto lo empujará naturalmente a la siguiente pregunta válida.
         while(appData.ds160_index < cuestionarioDS160.length && debeOmitirse(appData.ds160_index)) {
             appData.respuestas_ds160[cuestionarioDS160[appData.ds160_index].id] = "No aplica";
             appData.ds160_index++;
@@ -264,9 +338,9 @@
     function guardarCita(t, p) {
         let f = document.getElementById('cita_fecha').value;
         let h = document.getElementById('cita_hora').value;
-        let l = document.getElementById('cita_lugar').value;
+        let l = document.getElementById('cita_lugar').value.trim();
         
-        if(!f || !l) { mostrarAlerta("Debes ingresar obligatoriamente la fecha y la dirección de la cita."); return; }
+        if(!f || !l || l.length < 3) { mostrarAlerta("Debes ingresar obligatoriamente la fecha y la dirección completa de la cita."); return; }
         
         let hoy = new Date(); hoy.setHours(0,0,0,0);
         let fechaCita = new Date(f + 'T00:00:00');
@@ -277,19 +351,57 @@
     }
     
     function avanzarPaso(p) { appData.paso_actual = p; localStorage.setItem('datosVisado', JSON.stringify(appData)); renderScreen(p); }
-    function resetApp() { if(confirm("¿Estás seguro de borrar todos tus datos y reiniciar el trámite?")) { localStorage.removeItem('datosVisado'); appData = { paso_actual:0, pais:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; renderScreen(0); } }
+    
+    // --- NUEVAS FUNCIONES PARA EDITAR ---
+    function regresarAUltimaPregunta() {
+        appData.paso_actual = 5; 
+        appData.ds160_index = cuestionarioDS160.length - 1; 
+        
+        while(appData.ds160_index >= 0 && debeOmitirse(appData.ds160_index)) {
+            appData.ds160_index--;
+        }
+        localStorage.setItem('datosVisado', JSON.stringify(appData)); 
+        renderScreen(5);
+    }
+
+    function editarPregunta(idPregunta) {
+        let index = cuestionarioDS160.findIndex(q => q.id === idPregunta);
+        if(index !== -1) {
+            appData.paso_actual = 5;
+            appData.ds160_index = index;
+            localStorage.setItem('datosVisado', JSON.stringify(appData));
+            renderScreen(5);
+        }
+    }
+
+    function editarPaso(paso) {
+        appData.paso_actual = paso;
+        localStorage.setItem('datosVisado', JSON.stringify(appData));
+        renderScreen(paso);
+    }
+
+    function resetApp() { 
+        if(confirm("¿Estás seguro de borrar todos tus datos y reiniciar el trámite?")) { 
+            localStorage.removeItem('datosVisado'); 
+            appData = { paso_actual:0, pais:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+            renderScreen(0); 
+        } 
+    }
 
     function mostrarResumen() {
         let txtWhats = "*===== EXPEDIENTE DE VISA =====*\n\n";
         txtWhats += `*FOLIO PASAPORTE:* ${appData.folio_pasaporte}\n\n`;
         
-        let htmlVista = `<h2 style="color:#004481; border-bottom: 2px solid #004481; padding-bottom:10px;">Expediente de Visa</h2>`;
-        htmlVista += `<p><b>Folio Pasaporte:</b> ${appData.folio_pasaporte}</p>`;
+        let htmlVista = `<h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px;">Expediente de Visa</h2>`;
+        htmlVista += `<p><b>Folio Pasaporte:</b> ${appData.folio_pasaporte} <span onclick="editarPaso(2)" style="float:right; cursor:pointer; font-size:16px;" title="Editar">✏️</span></p>`;
         
         let categoriaActual = "";
 
         for (const [clave, valorOrig] of Object.entries(appData.respuestas_ds160)) {
             let p = cuestionarioDS160.find(item => item.id === clave);
+            
+            // Si el valor guardado es "No aplica" (porque se lo brincó), no lo mostramos en el resumen final.
+            if(valorOrig === "No aplica") continue;
             
             let valor = valorOrig;
             if(typeof valor === 'string' && valor.startsWith("{")) {
@@ -302,14 +414,19 @@
             if(p && p.categoria !== categoriaActual) {
                 categoriaActual = p.categoria;
                 txtWhats += `\n*--- SECCIÓN: ${categoriaActual} ---*\n`;
-                htmlVista += `<h3 style="background:#00d1b2; color:#fff; padding:5px; border-radius:3px; margin-top:20px;">${categoriaActual}</h3>`;
+                htmlVista += `<h3 style="background:var(--color-acento); color:#fff; padding:5px; border-radius:3px; margin-top:20px;">${categoriaActual}</h3>`;
             }
 
             let preguntaTXT = p ? p.pregunta : clave.toUpperCase();
             
             txtWhats += `*${preguntaTXT}*\n${valor}\n\n`;
+            
+            // Aquí agregamos el ícono del lápiz (span) conectado a la función editarPregunta
             htmlVista += `<div style="margin-bottom: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
-                            <p style="margin:0; font-size:12px; color:#555;">${preguntaTXT}</p>
+                            <p style="margin:0; font-size:12px; color:#555;">
+                                ${preguntaTXT}
+                                <span onclick="editarPregunta('${clave}')" style="float:right; cursor:pointer; font-size:16px; margin-left: 10px;" title="Editar esta respuesta">✏️</span>
+                            </p>
                             <p style="margin:0; font-size:16px; font-weight:bold; color:#000; white-space: pre-wrap;">${valor}</p>
                           </div>`;
         }
@@ -317,12 +434,14 @@
         if(appData.cita_cas) {
             let datosCas = `Fecha: ${appData.cita_cas.fecha} | Hora: ${appData.cita_cas.hora}\nLugar: ${appData.cita_cas.lugar}`;
             txtWhats += `*--- CITA CAS (HUELLAS) ---*\n${datosCas}\n\n`;
-            htmlVista += `<h3 style="color:#004481; margin-top:20px;">Cita de Huellas (CAS)</h3><p><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b><br>${appData.cita_cas.lugar}</p>`;
+            htmlVista += `<h3 style="color:var(--color-primario); margin-top:20px;">Cita de Huellas (CAS) <span onclick="editarPaso(8)" style="float:right; cursor:pointer; font-size:16px;" title="Editar Cita">✏️</span></h3>
+                          <p><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b><br>${appData.cita_cas.lugar}</p>`;
         }
         if(appData.cita_entrevista) {
             let datosEnt = `Fecha: ${appData.cita_entrevista.fecha} | Hora: ${appData.cita_entrevista.hora}\nLugar: ${appData.cita_entrevista.lugar}`;
             txtWhats += `*--- CITA CONSULADO ---*\n${datosEnt}\n\n`;
-            htmlVista += `<h3 style="color:#004481;">Cita Consular</h3><p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
+            htmlVista += `<h3 style="color:var(--color-primario);">Cita Consular <span onclick="editarPaso(11)" style="float:right; cursor:pointer; font-size:16px;" title="Editar Cita">✏️</span></h3>
+                          <p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
         }
 
         let textoCodificado = encodeURIComponent(txtWhats);
@@ -338,6 +457,10 @@
                 💬 Compartir por WhatsApp
             </button>
             <button class="secondary" onclick="renderScreen(13)">Volver atrás</button>
+            
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0 15px 0;">
+            <p style="font-size: 14px; color: #666; margin-bottom: 10px;">¿Terminaste de guardar este expediente?</p>
+            <button onclick="resetApp()" style="background: var(--color-acento); color: white;">🗑️ Borrar Datos y Crear Nuevo</button>
         `;
         
         document.getElementById('screenContent').innerHTML = pantallaFinal;
