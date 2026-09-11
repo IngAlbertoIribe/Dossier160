@@ -190,7 +190,8 @@ function renderScreen(pasoForzado = null) {
     switch(step) {
         case 0: 
             html = `
-                <h2 style="color: var(--color-primario); margin-top:0;">¡Bienvenido a Dossier160! ✈️</h2>
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✈️</div>
+                <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">¡Bienvenido a Dossier160!</h2>
                 
                 <div style="background: #f0f4f8; border-left: 4px solid var(--color-primario); padding: 12px; margin-bottom: 20px; text-align: left; border-radius: 4px; font-size: 14px; color: #333;">
                     <p style="margin: 0 0 8px 0;"><b>📋 Tu Asistente para Solicitud de Visa y Viajes:</b></p>
@@ -211,10 +212,45 @@ function renderScreen(pasoForzado = null) {
             `; 
             break;
 
-        case 1: html = `<h3>Paso 1: Pasaporte</h3><p>¿Ya cuentas con tu pasaporte vigente para viajar a ${paisActual}?</p><button onclick="avanzarPaso(2)">Sí, ya lo tengo</button><button onclick="avanzarPaso(3)" class="secondary">No, aún no</button>`; break;
-        case 2: html = `<h3>¡Excelente!</h3><p>Captura el folio de tu pasaporte:</p><input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}"><button onclick="guardarInputGeneral('folio_pasaporte', 'inputFolio', 4)">Guardar Folio</button>`; break;
-        case 3: html = `<h3>Paso Pendiente</h3><p>Es indispensable contar con tu pasaporte vigente para cualquier trámite de viaje.</p><div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te sugerimos solicitar cita en las oficinas de pasaportes de tu localidad.</div><p>Regresa cuando lo tengas listo.</p><button onclick="avanzarPaso(2)">¡Ya lo tengo!</button>`; break;
-        case 4: html = `<h3>Expediente de Viaje Iniciado 🏆</h3><p>Comenzaremos con el llenado del <b>Cuestionario de Solicitud de Visa</b> para ${paisActual}.</p><button onclick="avanzarPaso(5)">Comenzar Cuestionario</button>`; break;
+        case 1: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">📘</div>
+                <h3>Paso 1: Pasaporte</h3>
+                <p>¿Ya cuentas con tu pasaporte vigente para viajar a ${paisActual}?</p>
+                <button onclick="avanzarPaso(2)">Sí, ya lo tengo</button>
+                <button onclick="avanzarPaso(3)" class="secondary">No, aún no</button>
+            `; 
+            break;
+
+        case 2: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✍️</div>
+                <h3>¡Excelente!</h3>
+                <p>Captura el folio de tu pasaporte:</p>
+                <input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}">
+                <button onclick="guardarInputGeneral('folio_pasaporte', 'inputFolio', 4)">Guardar Folio</button>
+            `; 
+            break;
+
+        case 3: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">⏳</div>
+                <h3>Paso Pendiente</h3>
+                <p>Es indispensable contar con tu pasaporte vigente para cualquier trámite de viaje.</p>
+                <div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te sugerimos solicitar cita en las oficinas de pasaportes de tu localidad.</div>
+                <p>Regresa cuando lo tengas listo.</p>
+                <button onclick="avanzarPaso(2)">¡Ya lo tengo!</button>
+            `; 
+            break;
+
+        case 4: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🏆</div>
+                <h3>Expediente de Viaje Iniciado</h3>
+                <p>Comenzaremos con el llenado del <b>Cuestionario de Solicitud de Visa</b> para ${paisActual}.</p>
+                <button onclick="avanzarPaso(5)">Comenzar Cuestionario</button>
+            `; 
+            break;
 
         case 5:
             let idx = appData.ds160_index;
@@ -292,17 +328,81 @@ function renderScreen(pasoForzado = null) {
                      ${idx > 0 ? `<button onclick="retrocederPreguntaDS()" class="secondary">Regresar a la anterior</button>` : ''}`;
             break;
 
-        case 6: html = `<h3>¡Cuestionario Terminado! 📝✅</h3><p>Destino: <b>${paisActual}</b></p><button class="success" onclick="avanzarPaso(7)">Siguiente: Citas y Seguimiento</button>`; break;
-        case 7: html = `<h3>Paso 3: Cita de Registro Biométrico / Toma de Fotos</h3><button onclick="avanzarPaso(8)">Sí, ya la agendé</button><button onclick="avanzarPaso(9)" class="secondary">No, aún no</button>`; break;
-        case 8: html = `<h3>Tus Datos de Biométricos</h3><div class="tip-box"><strong>💡 Tip:</strong> Registro de huellas digitales y fotografía oficial.</div><input type="date" id="cita_fecha" value="${appData.cita_cas?.fecha || ''}"><input type="time" id="cita_hora" value="${appData.cita_cas?.hora || ''}"><input type="text" id="cita_lugar" placeholder="Ciudad y Dirección de la cita" value="${appData.cita_cas?.lugar || ''}"><button onclick="guardarCita('cas', 10)">Guardar Cita</button>`; break;
-        case 9: html = `<div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te recomendamos consultar las fechas disponibles en el portal oficial o con un asesor de confianza.</div><p>Vuelve cuando tengas tu fecha.</p><button onclick="avanzarPaso(8)">¡Ya agendé!</button><button onclick="avanzarPaso(10)" class="secondary">Dejar pendiente y avanzar</button>`; break;
-        case 10: html = `<h3>Paso 4: Cita Consular / Entrevista de Visado</h3><button onclick="avanzarPaso(11)">Sí, ya la tengo</button><button onclick="avanzarPaso(12)" class="secondary">No, aún no</button>`; break;
-        case 11: html = `<h3>Datos de la Cita Consular</h3><div class="warning-box"><strong>⚠️ ATENCIÓN:</strong> Verifica las fechas de tu cita y la ubicación exacta del consulado o embajada.</div><input type="date" id="cita_fecha" value="${appData.cita_entrevista?.fecha || ''}"><input type="time" id="cita_hora" value="${appData.cita_entrevista?.hora || ''}"><input type="text" id="cita_lugar" placeholder="Ciudad y Consulado/Embajada" value="${appData.cita_entrevista?.lugar || ''}"><button onclick="guardarCita('entrevista', 13)">Guardar Cita</button>`; break;
-        case 12: html = `<div class="agency-box"><strong>🤝 Recomendación:</strong><br>Monitorea constantemente el sistema oficial en caso de que se liberen fechas más cercanas.</div><p>Regresa cuando tengas tus fechas listas.</p><button onclick="avanzarPaso(11)">¡Ya agendé!</button><button onclick="avanzarPaso(13)" class="secondary">Finalizar sin fecha de cita</button>`; break;
-        
+        case 6: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">📝</div>
+                <h3>¡Cuestionario Terminado!</h3>
+                <p>Destino: <b>${paisActual}</b></p>
+                <button class="success" onclick="avanzarPaso(7)">Siguiente: Citas y Seguimiento</button>
+            `; 
+            break;
+
+        case 7: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">📸</div>
+                <h3>Paso 3: Cita de Registro Biométrico / Toma de Fotos</h3>
+                <button onclick="avanzarPaso(8)">Sí, ya la agendé</button>
+                <button onclick="avanzarPaso(9)" class="secondary">No, aún no</button>
+            `; 
+            break;
+
+        case 8: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">📅</div>
+                <h3>Tus Datos de Biométricos</h3>
+                <div class="tip-box"><strong>💡 Tip:</strong> Registro de huellas digitales y fotografía oficial.</div>
+                <input type="date" id="cita_fecha" value="${appData.cita_cas?.fecha || ''}">
+                <input type="time" id="cita_hora" value="${appData.cita_cas?.hora || ''}">
+                <input type="text" id="cita_lugar" placeholder="Ciudad y Dirección de la cita" value="${appData.cita_cas?.lugar || ''}">
+                <button onclick="guardarCita('cas', 10)">Guardar Cita</button>
+            `; 
+            break;
+
+        case 9: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🤝</div>
+                <div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te recomendamos consultar las fechas disponibles en el portal oficial o con un asesor de confianza.</div>
+                <p>Vuelve cuando tengas tu fecha.</p>
+                <button onclick="avanzarPaso(8)">¡Ya agendé!</button>
+                <button onclick="avanzarPaso(10)" class="secondary">Dejar pendiente y avanzar</button>
+            `; 
+            break;
+
+        case 10: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🏛️</div>
+                <h3>Paso 4: Cita Consular / Entrevista de Visado</h3>
+                <button onclick="avanzarPaso(11)">Sí, ya la tengo</button>
+                <button onclick="avanzarPaso(12)" class="secondary">No, aún no</button>
+            `; 
+            break;
+
+        case 11: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">📍</div>
+                <h3>Datos de la Cita Consular</h3>
+                <div class="warning-box"><strong>⚠️ ATENCIÓN:</strong> Verifica las fechas de tu cita y la ubicación exacta del consulado o embajada.</div>
+                <input type="date" id="cita_fecha" value="${appData.cita_entrevista?.fecha || ''}">
+                <input type="time" id="cita_hora" value="${appData.cita_entrevista?.hora || ''}">
+                <input type="text" id="cita_lugar" placeholder="Ciudad y Consulado/Embajada" value="${appData.cita_entrevista?.lugar || ''}">
+                <button onclick="guardarCita('entrevista', 13)">Guardar Cita</button>
+            `; 
+            break;
+
+        case 12: 
+            html = `
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🔎</div>
+                <div class="agency-box"><strong>🤝 Recomendación:</strong><br>Monitorea constantemente el sistema oficial en caso de que se liberen fechas más cercanas.</div>
+                <p>Regresa cuando tengas tus fechas listas.</p>
+                <button onclick="avanzarPaso(11)">¡Ya agendé!</button>
+                <button onclick="avanzarPaso(13)" class="secondary">Finalizar sin fecha de cita</button>
+            `; 
+            break;
+
         case 13: 
             html = `
-                <h3 style="color: var(--color-primario);">¡Expediente Completo! 🏆🎉</h3>
+                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--color-primario);">¡Expediente Completo!</h3>
                 <p>Tienes toda la información organizada para tu solicitud de visa a <b>${paisActual}</b>.</p>
                 
                 <div class="interview-tips">
@@ -320,16 +420,17 @@ function renderScreen(pasoForzado = null) {
     }
 
     if (pasoForzado === null && appData.paso_actual > 0) {
-        html = `<h3>¡Bienvenido de vuelta! 👋</h3>
-                <p>Solicitud de viaje en proceso para: <b>${paisActual}</b></p>
-                <button class="success" onclick="renderScreen(${appData.paso_actual})">🚀 Continuar Mi Expediente</button>
-                <br>
-                <button onclick="resetApp()" style="background:none; color:red; border:none; margin-top:20px; text-decoration:underline; cursor:pointer;">Borrar mis datos y empezar de nuevo</button>`;
+        html = `
+            <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">👋</div>
+            <h3>¡Bienvenido de vuelta!</h3>
+            <p>Solicitud de viaje en proceso para: <b>${paisActual}</b></p>
+            <button class="success" onclick="renderScreen(${appData.paso_actual})">🚀 Continuar Mi Expediente</button>
+            <br>
+            <button onclick="resetApp()" style="background:none; color:red; border:none; margin-top:20px; text-decoration:underline; cursor:pointer;">Borrar mis datos y empezar de nuevo</button>
+        `;
     }
     document.getElementById('screenContent').innerHTML = html;
-}
-
-// --- LÓGICA DE GUARDADO ---
+}// --- LÓGICA DE GUARDADO ---
 
 function guardarPaisInicial() {
     let p = document.getElementById('selectPaisDestino').value;
