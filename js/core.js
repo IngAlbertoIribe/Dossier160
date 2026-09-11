@@ -39,21 +39,18 @@ const cuestionarioBase = [
     // --- PROPIEDADES (ARRAIGO PERSONAL) ---
     { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
-    // --- SECCIÓN 2: PROFESIONAL ---
+    // --- SECCIÓN 2: PROFESIONAL (FORMULARIOS COMPUESTOS) ---
     { categoria: "PROFESIONAL", id: "educacion_completa", pregunta: "INFORMACIÓN ACADÉMICA:", tip: "Captura tu nivel, tu especialidad (si aplica) y tus instituciones.", tipo: "educacion_combo" },
     { categoria: "PROFESIONAL", id: "anos_experiencia", pregunta: "¿CUÁNTOS AÑOS DE EXPERIENCIA TIENE EN SU PROFESIÓN/OFICIO?", tip: "Escribe solo el número de años ejerciendo. Ej. 10", tipo: "number" },
-    { categoria: "PROFESIONAL", id: "ocupacion", pregunta: "OCUPACIÓN PRINCIPAL O PUESTO ACTUAL:", tip: "Ej. Vendedor, Estudiante, Ama de casa, Ingeniero.", tipo: "text" },
     
-    // BLOQUE DE DATOS DE LA EMPRESA / EMPLEO ACTUAL
-    { categoria: "PROFESIONAL", id: "empresa_actual", pregunta: "EMPRESA O INSTITUCIÓN DONDE LABORA/ESTUDIA:", tip: "Nombre, Fecha de ingreso y Teléfono.", tipo: "textarea" },
-    { categoria: "PROFESIONAL", id: "direccion_empresa", pregunta: "DIRECCIÓN COMPLETA DE TRABAJO Ó ESCUELA:", tip: "Calle, número, colonia, ciudad y estado.", tipo: "textarea" },
-    { categoria: "PROFESIONAL", id: "antiguedad_empleo", pregunta: "¿QUÉ ANTIGÜEDAD TIENE EN SU EMPLEO ACTUAL? (EN AÑOS):", tip: "Especifica el número de años. Ej. 5. Si tienes 5 o más, omitiremos empleos anteriores.", tipo: "number" },
-    { categoria: "PROFESIONAL", id: "sueldo", pregunta: "SUELDO MENSUAL SIN DEDUCCIONES (BRUTO):", tip: "Debe coincidir con tus recibos de nómina o ingresos comprobables.", tipo: "text" },
-    { categoria: "PROFESIONAL", id: "funciones_trabajo", pregunta: "DESCRIBA BREVEMENTE SUS FUNCIONES:", tip: "Usa oraciones completas. Ej. 'Atención a clientes y gestión de inventario'. Evita palabras sueltas.", tipo: "textarea" },
+    // PASO UNIFICADO 1: EMPRESA Y DIRECCIÓN
+    { categoria: "PROFESIONAL", id: "empresa_y_direccion", pregunta: "DATOS DE LA EMPRESA O INSTITUCIÓN ACTUAL:", tip: "Nombre de la empresa/escuela, teléfono y su domicilio completo.", tipo: "empresa_combo" },
     
-    // Omitida si antigüedad >= 5 años
+    // PASO UNIFICADO 2: PUESTO, ANTIGÜEDAD, FUNCIONES Y SUELDO
+    { categoria: "PROFESIONAL", id: "puesto_y_detalles", pregunta: "DETALLES DE SU PUESTO Y ACTIVIDADES:", tip: "Ingresa tu puesto, antigüedad, sueldo bruto y descripción de funciones.", tipo: "puesto_combo" },
+    
+    // Omitida si antigüedad en el empleo actual >= 5 años
     { categoria: "PROFESIONAL", id: "empleos_anteriores", pregunta: "MENCIONE SUS ÚLTIMOS 2 EMPLEOS ANTERIORES:", tip: "Empresa, dirección, tel, cargo, jefe y fechas.", tipo: "textarea" },
-    
     { categoria: "PROFESIONAL", id: "organizaciones", pregunta: "¿PERTENECE A UNA ORGANIZACIÓN SOCIAL O PROFESIONAL?:", tip: "Colegios, sindicatos, clubes, etc.", tipo: "sino_texto" },
 
     // --- SECCIÓN 3: CONSULADO Y VIAJE ---
@@ -100,13 +97,19 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     cita_entrevista: null
 };
 
-// --- FUNCIONES DE FORMATEO ---
+// --- FUNCIONES DE FORMATEO Y LIMPIEZA ---
+function obtenerNombrePaisLimpio(pais) {
+    if (!pais) return "";
+    return pais.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
+}
+
 function formatearTextoPregunta(textoOriginal, paisActual) {
+    let paisLimpio = obtenerNombrePaisLimpio(paisActual);
     return textoOriginal
-        .replace("DEL PAÍS DESTINO", `DE ${paisActual}`)
-        .replace("EN EL PAÍS DESTINO", `EN ${paisActual}`)
-        .replace("EN PAÍS DESTINO", `EN ${paisActual}`)
-        .replace("PAÍS DESTINO", paisActual);
+        .replace("DEL PAÍS DESTINO", `DE ${paisLimpio.toUpperCase()}`)
+        .replace("EN EL PAÍS DESTINO", `EN ${paisLimpio.toUpperCase()}`)
+        .replace("EN PAÍS DESTINO", `EN ${paisLimpio.toUpperCase()}`)
+        .replace("PAÍS DESTINO", paisLimpio);
 }
 
 // --- FUNCIONES AUXILIARES ---
@@ -128,8 +131,14 @@ function debeOmitirse(idx) {
     if ((appData.respuestas_ds160['estado_civil'] === 'Soltero(a)' || appData.respuestas_ds160['estado_civil'] === 'Divorciado(a)') && PREGUNTAS_A_OMITIR_SOLTERO.includes(q.id)) return true;
     
     if (q.id === 'empleos_anteriores') {
-        let antiguedad = parseInt(appData.respuestas_ds160['antiguedad_empleo']);
-        if (!isNaN(antiguedad) && antiguedad >= 5) return true;
+        let datosPuesto = appData.respuestas_ds160['puesto_y_detalles'];
+        if(datosPuesto && datosPuesto.startsWith("{")) {
+            try {
+                let obj = JSON.parse(datosPuesto);
+                let antiguedad = parseInt(obj.antiguedad);
+                if (!isNaN(antiguedad) && antiguedad >= 5) return true;
+            } catch(e){}
+        }
     }
 
     return false;
@@ -273,7 +282,7 @@ function renderScreen(pasoForzado = null) {
             let preguntaTexto = formatearTextoPregunta(q.pregunta, paisActual);
 
             html = `<p style="text-transform: uppercase; font-size: 13px; color: #666; margin-bottom:0; font-weight:bold;">Cuestionario: Pregunta ${idx + 1} de ${cuestionarioBase.length}</p>
-                    <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria} (${paisActual})</p>
+                    <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria} (${obtenerNombrePaisLimpio(paisActual)})</p>
                     <h3 style="text-align: left; margin-top:5px;">${preguntaTexto}</h3>`;
 
             if (q.tipo === "direccion_mx") {
@@ -305,6 +314,36 @@ function renderScreen(pasoForzado = null) {
 
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">3. Instituciones a las que asistió:</label>
                     <textarea id="edu_escuelas" placeholder="Nombre de la escuela, domicilio completo y fechas...">${datosEdu.escuelas}</textarea>`;
+            }
+            else if (q.tipo === "empresa_combo") {
+                let d = {nombre: "", direccion: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre de la Empresa o Institución:</label>
+                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Grupo Dportenis / Freelance / Ama de casa">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Dirección Completa y Teléfono:</label>
+                    <textarea id="emp_direccion" placeholder="Calle, número, colonia, ciudad, estado y teléfono de contacto...">${d.direccion}</textarea>
+                `;
+            }
+            else if (q.tipo === "puesto_combo") {
+                let d = {puesto: "", antiguedad: "", funciones: "", sueldo: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Puesto u Ocupación Principal:</label>
+                    <input type="text" id="pst_nombre" value="${d.puesto}" placeholder="Ej. Desarrollador Senior / Estudiante">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Antigüedad en el puesto (en años):</label>
+                    <input type="number" id="pst_antiguedad" value="${d.antiguedad}" placeholder="Ej. 5">
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. Sueldo Mensual Bruto (sin deducciones):</label>
+                    <input type="text" id="pst_sueldo" value="${d.sueldo}" placeholder="Ej. $25,000 MXN">
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">4. Descripción breve de Funciones:</label>
+                    <textarea id="pst_funciones" placeholder="Describe tus tareas diarias usando oraciones completas...">${d.funciones}</textarea>
+                `;
             }
             else if (q.tipo === "sino_texto") {
                 let isSi = respuestaPrevia.startsWith("Sí");
@@ -469,6 +508,21 @@ function guardarRespuestaCuestionario(id, tipo) {
 
         v = JSON.stringify({nivel: n, especialidad: e, escuelas: esc});
     }
+    else if(tipo === "empresa_combo") {
+        let nom = document.getElementById('emp_nombre').value.trim();
+        let dir = document.getElementById('emp_direccion').value.trim();
+        if(!nom || !dir) { mostrarAlerta("Por favor, ingresa el nombre de la empresa y la dirección completa."); return; }
+        v = JSON.stringify({nombre: nom, direccion: dir});
+    }
+    else if(tipo === "puesto_combo") {
+        let pst = document.getElementById('pst_nombre').value.trim();
+        let ant = document.getElementById('pst_antiguedad').value.trim();
+        let sld = document.getElementById('pst_sueldo').value.trim();
+        let fnc = document.getElementById('pst_funciones').value.trim();
+
+        if(!pst || !ant || !sld || !fnc) { mostrarAlerta("Por favor completa todos los campos de tu puesto actual."); return; }
+        v = JSON.stringify({puesto: pst, antiguedad: ant, sueldo: sld, funciones: fnc});
+    }
     else if(tipo === "sino_texto") {
         let sino = document.getElementById('respuestaDS160_sino').value;
         if(!sino) { mostrarAlerta("Por favor, selecciona Sí o No."); return; }
@@ -584,13 +638,14 @@ function editarPasoDesdeResumen(paso) {
 
 function mostrarResumen() {
     let paisActual = appData.pais_destino || "Estados Unidos 🇺🇸";
+    let paisLimpio = obtenerNombrePaisLimpio(paisActual);
     
     let txtWhats = `*===== EXPEDIENTE DE SOLICITUD DE VISA =====*\n`;
-    txtWhats += `*DESTINO DE VIAJE:* ${paisActual}\n`;
+    txtWhats += `*DESTINO DE VIAJE:* ${paisLimpio}\n`;
     txtWhats += `*FOLIO PASAPORTE:* ${appData.folio_pasaporte}\n\n`;
     
     let htmlVista = `<h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px;">Expediente de Solicitud de Visa</h2>`;
-    htmlVista += `<p><b>País Destino:</b> ${paisActual} <span onclick="editarPasoDesdeResumen(0)" style="float:right; cursor:pointer; font-size:16px;" title="Editar País">✏️</span></p>`;
+    htmlVista += `<p><b>País Destino:</b> ${paisLimpio} <span onclick="editarPasoDesdeResumen(0)" style="float:right; cursor:pointer; font-size:16px;" title="Editar País">✏️</span></p>`;
     htmlVista += `<p><b>Folio Pasaporte:</b> ${appData.folio_pasaporte} <span onclick="editarPasoDesdeResumen(2)" style="float:right; cursor:pointer; font-size:16px;" title="Editar">✏️</span></p>`;
     
     let categoriaActual = "";
@@ -604,7 +659,13 @@ function mostrarResumen() {
         if(typeof valor === 'string' && valor.startsWith("{")) {
             try {
                 let obj = JSON.parse(valor);
-                if(obj.nivel) valor = `Nivel: ${obj.nivel}\nEspecialidad: ${obj.especialidad || 'N/A'}\nInstituciones:\n${obj.escuelas}`;
+                if(obj.nivel) {
+                    valor = `Nivel: ${obj.nivel}\nEspecialidad: ${obj.especialidad || 'N/A'}\nInstituciones:\n${obj.escuelas}`;
+                } else if(obj.nombre) {
+                    valor = `Empresa/Institución: ${obj.nombre}\nDirección: ${obj.direccion}`;
+                } else if(obj.puesto) {
+                    valor = `Puesto: ${obj.puesto}\nAntigüedad: ${obj.antiguedad} años\nSueldo Mensual: ${obj.sueldo}\nFunciones:\n${obj.funciones}`;
+                }
             } catch(e) {}
         }
 
@@ -614,7 +675,7 @@ function mostrarResumen() {
             htmlVista += `<h3 style="background:var(--color-acento); color:#fff; padding:5px; border-radius:3px; margin-top:20px;">${categoriaActual}</h3>`;
         }
 
-        let preguntaTXT = p ? formatearTextoPregunta(p.pregunta, paisActual) : clave.toUpperCase();
+        let preguntaTXT = p ? formatearTextoPregunta(p.pregunta, paisLimpio) : clave.toUpperCase();
         
         txtWhats += `*${preguntaTXT}*\n${valor}\n\n`;
         
