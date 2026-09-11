@@ -3,7 +3,6 @@
 // ==========================================
 
 // --- DEFINICIÓN DEL CUESTIONARIO BASE ---
-// Las preguntas que mencionan "PAÍS DESTINO" se adaptan dinámicamente en pantalla.
 const cuestionarioBase = [
     // --- SECCIÓN 1: PERSONAL ---
     { categoria: "PERSONAL", id: "email", pregunta: "E-MAIL:", tip: "Usa un correo al que tengas acceso diario.", tipo: "email" },
@@ -36,26 +35,26 @@ const cuestionarioBase = [
     { categoria: "PERSONAL", id: "datos_padres", pregunta: "NOMBRE Y FECHA DE NACIMIENTO DE SU PADRE Y MADRE:", tip: "⚠️ OBLIGATORIO: Nombres completos (con apellidos) y fechas de nacimiento de AMBOS. Aunque hayan fallecido.", tipo: "textarea" },
     { categoria: "PERSONAL", id: "ocupacion_padres", pregunta: "¿A QUÉ SE DEDICAN SUS PADRES?", tip: "Aunque estén jubilados o fallecidos, especificarlo.", tipo: "textarea" },
     { categoria: "PERSONAL", id: "idiomas", pregunta: "IDIOMAS QUE DOMINA AL 100%:", tip: "Ej. Español, Inglés.", tipo: "text" },
+    
+    // --- PROPIEDADES (ARRAIGO PERSONAL) ---
+    { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
     // --- SECCIÓN 2: PROFESIONAL ---
     { categoria: "PROFESIONAL", id: "educacion_completa", pregunta: "INFORMACIÓN ACADÉMICA:", tip: "Captura tu nivel, tu especialidad (si aplica) y tus instituciones.", tipo: "educacion_combo" },
-    { categoria: "PROFESIONAL", id: "ocupacion", pregunta: "OCUPACIÓN PRINCIPAL O PUESTO ACTUAL:", tip: "Ej. Vendedor, Estudiante, Ama de casa, Ingeniero.", tipo: "text" },
     { categoria: "PROFESIONAL", id: "anos_experiencia", pregunta: "¿CUÁNTOS AÑOS DE EXPERIENCIA TIENE EN SU PROFESIÓN/OFICIO?", tip: "Escribe solo el número de años ejerciendo. Ej. 10", tipo: "number" },
-    { categoria: "PROFESIONAL", id: "sueldo", pregunta: "SUELDO MENSUAL SIN DEDUCCIONES (BRUTO):", tip: "Debe coincidir con tus recibos de nómina o ingresos comprobables.", tipo: "text" },
-    { categoria: "PROFESIONAL", id: "empresa_actual", pregunta: "EMPRESA O INSTITUCIÓN DONDE LABORA/ESTUDIA:", tip: "Nombre, Fecha de ingreso y Teléfono.", tipo: "textarea" },
-    { categoria: "PROFESIONAL", id: "antiguedad_empleo", pregunta: "¿QUÉ ANTIGÜEDAD TIENE EN SU EMPLEO ACTUAL? (EN AÑOS):", tip: "Especifica el número de años. Ej. 5. Si tienes 5 o más, omitiremos empleos anteriores.", tipo: "number" },
+    { categoria: "PROFESIONAL", id: "ocupacion", pregunta: "OCUPACIÓN PRINCIPAL O PUESTO ACTUAL:", tip: "Ej. Vendedor, Estudiante, Ama de casa, Ingeniero.", tipo: "text" },
     
-    // --- FUNCIONES DE TRABAJO ---
-    { categoria: "PROFESIONAL", id: "funciones_trabajo", pregunta: "DESCRIBA BREVEMENTE SUS FUNCIONES:", tip: "Usa oraciones completas. Ej. 'Atención a clientes y gestión de inventario'. Evita palabras sueltas.", tipo: "textarea" },
+    // BLOQUE DE DATOS DE LA EMPRESA / EMPLEO ACTUAL
+    { categoria: "PROFESIONAL", id: "empresa_actual", pregunta: "EMPRESA O INSTITUCIÓN DONDE LABORA/ESTUDIA:", tip: "Nombre, Fecha de ingreso y Teléfono.", tipo: "textarea" },
     { categoria: "PROFESIONAL", id: "direccion_empresa", pregunta: "DIRECCIÓN COMPLETA DE TRABAJO Ó ESCUELA:", tip: "Calle, número, colonia, ciudad y estado.", tipo: "textarea" },
+    { categoria: "PROFESIONAL", id: "antiguedad_empleo", pregunta: "¿QUÉ ANTIGÜEDAD TIENE EN SU EMPLEO ACTUAL? (EN AÑOS):", tip: "Especifica el número de años. Ej. 5. Si tienes 5 o más, omitiremos empleos anteriores.", tipo: "number" },
+    { categoria: "PROFESIONAL", id: "sueldo", pregunta: "SUELDO MENSUAL SIN DEDUCCIONES (BRUTO):", tip: "Debe coincidir con tus recibos de nómina o ingresos comprobables.", tipo: "text" },
+    { categoria: "PROFESIONAL", id: "funciones_trabajo", pregunta: "DESCRIBA BREVEMENTE SUS FUNCIONES:", tip: "Usa oraciones completas. Ej. 'Atención a clientes y gestión de inventario'. Evita palabras sueltas.", tipo: "textarea" },
     
     // Omitida si antigüedad >= 5 años
     { categoria: "PROFESIONAL", id: "empleos_anteriores", pregunta: "MENCIONE SUS ÚLTIMOS 2 EMPLEOS ANTERIORES:", tip: "Empresa, dirección, tel, cargo, jefe y fechas.", tipo: "textarea" },
     
     { categoria: "PROFESIONAL", id: "organizaciones", pregunta: "¿PERTENECE A UNA ORGANIZACIÓN SOCIAL O PROFESIONAL?:", tip: "Colegios, sindicatos, clubes, etc.", tipo: "sino_texto" },
-    
-    // --- PROPIEDADES (ARRAIGO) ---
-    { categoria: "PROFESIONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
     // --- SECCIÓN 3: CONSULADO Y VIAJE ---
     { categoria: "CONSULADO Y VIAJE", id: "motivo_visita", pregunta: "¿CUÁL ES EL MOTIVO PRINCIPAL DE SU VIAJE?", tip: "Sé muy específico. Ej. 'Turismo, vacaciones y compras'.", tipo: "textarea" },
@@ -100,6 +99,15 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     cita_cas: null, 
     cita_entrevista: null
 };
+
+// --- FUNCIONES DE FORMATEO ---
+function formatearTextoPregunta(textoOriginal, paisActual) {
+    return textoOriginal
+        .replace("DEL PAÍS DESTINO", `DE ${paisActual}`)
+        .replace("EN EL PAÍS DESTINO", `EN ${paisActual}`)
+        .replace("EN PAÍS DESTINO", `EN ${paisActual}`)
+        .replace("PAÍS DESTINO", paisActual);
+}
 
 // --- FUNCIONES AUXILIARES ---
 
@@ -262,7 +270,7 @@ function renderScreen(pasoForzado = null) {
             let q = cuestionarioBase[idx];
             let respuestaPrevia = appData.respuestas_ds160[q.id] || "";
 
-            let preguntaTexto = q.pregunta.replace("EL PAÍS DESTINO", paisActual).replace("PAÍS DESTINO", paisActual);
+            let preguntaTexto = formatearTextoPregunta(q.pregunta, paisActual);
 
             html = `<p style="text-transform: uppercase; font-size: 13px; color: #666; margin-bottom:0; font-weight:bold;">Cuestionario: Pregunta ${idx + 1} de ${cuestionarioBase.length}</p>
                     <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria} (${paisActual})</p>
@@ -430,7 +438,9 @@ function renderScreen(pasoForzado = null) {
         `;
     }
     document.getElementById('screenContent').innerHTML = html;
-}// --- LÓGICA DE GUARDADO ---
+}
+
+// --- LÓGICA DE GUARDADO ---
 
 function guardarPaisInicial() {
     let p = document.getElementById('selectPaisDestino').value;
@@ -604,7 +614,7 @@ function mostrarResumen() {
             htmlVista += `<h3 style="background:var(--color-acento); color:#fff; padding:5px; border-radius:3px; margin-top:20px;">${categoriaActual}</h3>`;
         }
 
-        let preguntaTXT = p ? p.pregunta.replace("EL PAÍS DESTINO", paisActual).replace("PAÍS DESTINO", paisActual) : clave.toUpperCase();
+        let preguntaTXT = p ? formatearTextoPregunta(p.pregunta, paisActual) : clave.toUpperCase();
         
         txtWhats += `*${preguntaTXT}*\n${valor}\n\n`;
         
