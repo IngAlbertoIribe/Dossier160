@@ -105,7 +105,7 @@
         document.getElementById('progressBar').style.width = ((progresoReal / TOTAL_PASOS) * 100) + "%";
 
         switch(step) {
-            case 0: html = `<h3>¡Bienvenido!</h3><p>Captura tu información paso a paso.</p><button onclick="guardarDato('pais', 'USA', 1)">Iniciar </button>`; break;
+            case 0: html = `<h3>¡Bienvenido!</h3><p>Captura tu información paso a paso.</p><button onclick="guardarDato('pais', 'USA', 1)">Iniciar Expediente</button>`; break;
             case 1: html = `<h3>Paso 1: Pasaporte</h3><p>¿Ya cuentas con tu pasaporte vigente?</p><button onclick="avanzarPaso(2)">Sí, ya lo tengo</button><button onclick="avanzarPaso(3)" class="secondary">No, aún no</button>`; break;
             case 2: html = `<h3>¡Excelente!</h3><p>Captura el folio de tu pasaporte:</p><input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}"><button onclick="guardarInputGeneral('folio_pasaporte', 'inputFolio', 4)">Guardar Folio</button>`; break;
             case 3: html = `<h3>Paso Pendiente</h3><p>Es indispensable contar con tu pasaporte.</p><div class="agency-box"><strong>🤝 Recomendación:</strong><br>Te sugerimos buscar una agencia de confianza para que te asesoren con tu pasaporte.</div><p>Regresa cuando lo tengas.</p><button onclick="avanzarPaso(2)">¡Ya lo tengo!</button>`; break;
