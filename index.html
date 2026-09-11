@@ -198,8 +198,8 @@
 
                 if (q.tipo === "direccion_mx") {
                     html += `
-                        <div class="cp-container"><label>1. Código Postal:</label><div class="cp-row"><input type="number" id="cp_input" placeholder="Ej. 82180" onkeyup="if(this.value.length === 5) buscarCP()"><button type="button" class="btn-buscar" onclick="buscarCP()">Buscar</button></div>
-                        <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. 2 de Abril 1703"></div>
+                        <div class="cp-container"><label>1. Código Postal:</label><div class="cp-row"><input type="number" id="cp_input" placeholder="Ej. 80000" onkeyup="if(this.value.length === 5) buscarCP()"><button type="button" class="btn-buscar" onclick="buscarCP()">Buscar</button></div>
+                        <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. Calle #1"></div>
                         ${respuestaPrevia ? `<p style="font-size:13px; color:#0d47a1;"><b>Guardado:</b><br>${respuestaPrevia}</p>` : ''}</div>`;
                 } 
                 else if (q.tipo === "educacion_combo") {
