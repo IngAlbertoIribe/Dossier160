@@ -6,8 +6,10 @@
 const cuestionarioBase = [
     // --- SECCIÓN 1: PERSONAL ---
     { categoria: "PERSONAL", id: "email", pregunta: "E-MAIL:", tip: "Usa un correo al que tengas acceso diario.", tipo: "email" },
-    { categoria: "PERSONAL", id: "nombre_completo", pregunta: "NOMBRE Y APELLIDOS COMPLETOS:", tip: "Exactamente como aparecen en tu pasaporte.", tipo: "text" },
-    { categoria: "PERSONAL", id: "fecha_nacimiento", pregunta: "FECHA DE NACIMIENTO:", tip: "Abre el calendario y selecciona tu fecha.", tipo: "date" },
+    
+    // PASO UNIFICADO: NOMBRE Y FECHA DE NACIMIENTO
+    { categoria: "PERSONAL", id: "nombre_nacimiento_combo", pregunta: "NOMBRE COMPLETO Y FECHA DE NACIMIENTO:", tip: "Ingresa tu nombre exactamente como aparece en tu pasaporte y tu fecha de nacimiento.", tipo: "nombre_nacimiento_combo" },
+    
     { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
     
     // Omitidas si es Soltero o Divorciado
@@ -290,7 +292,19 @@ function renderScreen(pasoForzado = null) {
                     <div class="cp-container"><label>1. Código Postal:</label><div class="cp-row"><input type="number" id="cp_input" placeholder="Ej. 80000" onkeyup="if(this.value.length === 5) buscarCP()"><button type="button" class="btn-buscar" onclick="buscarCP()">Buscar</button></div>
                     <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. Calle 123"></div>
                     ${respuestaPrevia ? `<p style="font-size:13px; color:var(--color-primario);"><b>Guardado:</b><br>${respuestaPrevia}</p>` : ''}</div>`;
-            } 
+            }
+            else if (q.tipo === "nombre_nacimiento_combo") {
+                let d = {nombreCompleto: "", fechaNacimiento: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre(s) y Apellidos Completos:</label>
+                    <input type="text" id="per_nombre" value="${d.nombreCompleto}" placeholder="Escríbelos exactamente como en tu pasaporte">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha de Nacimiento:</label>
+                    <input type="date" id="per_fecha" value="${d.fechaNacimiento}">
+                `;
+            }
             else if (q.tipo === "padres_combo") {
                 let d = {nombres: "", ocupacion: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -565,6 +579,19 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(ca.length < 3) { mostrarAlerta("La calle debe ser más descriptiva."); return; }
         v = `${ca}, Col. ${co}, C.P. ${cp}`;
     } 
+    else if(tipo === "nombre_nacimiento_combo") {
+        let nom = document.getElementById('per_nombre').value.trim();
+        let fch = document.getElementById('per_fecha').value.trim();
+
+        if(!nom || !fch) { mostrarAlerta("Por favor completa tu nombre y fecha de nacimiento."); return; }
+        if(nom.length < 3) { mostrarAlerta("Por favor ingresa tu nombre y apellidos completos."); return; }
+
+        let hoy = new Date(); hoy.setHours(0,0,0,0);
+        let fechaIngresada = new Date(fch + 'T00:00:00');
+        if (fechaIngresada >= hoy) { mostrarAlerta("La fecha de nacimiento no puede ser hoy ni futura."); return; }
+
+        v = JSON.stringify({nombreCompleto: nom, fechaNacimiento: fch});
+    }
     else if(tipo === "padres_combo") {
         let nom = document.getElementById('pad_nombres').value.trim();
         let ocu = document.getElementById('pad_ocupacion').value.trim();
@@ -664,10 +691,10 @@ function guardarRespuestaCuestionario(id, tipo) {
             let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if(!re.test(v)) { mostrarAlerta("El correo electrónico no es válido."); return; }
         }
-        if (id === "fecha_nacimiento" || id === "fecha_esposo") {
+        if (id === "fecha_esposo") {
             let hoy = new Date(); hoy.setHours(0,0,0,0);
             let fechaIngresada = new Date(v + 'T00:00:00');
-            if (fechaIngresada >= hoy) { mostrarAlerta("La fecha de nacimiento no puede ser hoy ni futura."); return; }
+            if (fechaIngresada >= hoy) { mostrarAlerta("La fecha ingresada no puede ser hoy ni futura."); return; }
         }
     }
     
@@ -767,7 +794,9 @@ function mostrarResumen() {
         if(typeof valor === 'string' && valor.startsWith("{")) {
             try {
                 let obj = JSON.parse(valor);
-                if(obj.nivel !== undefined) {
+                if(obj.nombreCompleto !== undefined && obj.fechaNacimiento !== undefined) {
+                    valor = `Nombre Completo: ${obj.nombreCompleto}\nFecha de Nacimiento: ${obj.fechaNacimiento}`;
+                } else if(obj.nivel !== undefined) {
                     valor = `Nivel: ${obj.nivel}\nEspecialidad: ${obj.especialidad || 'N/A'}\nInstituciones:\n${obj.escuelas}`;
                 } else if(obj.nombre !== undefined && obj.direccion !== undefined) {
                     valor = `Empresa/Institución: ${obj.nombre}\nDirección: ${obj.direccion}`;
