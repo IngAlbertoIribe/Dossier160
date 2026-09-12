@@ -53,17 +53,19 @@ const cuestionarioBase = [
     { categoria: "PROFESIONAL", id: "empleos_anteriores", pregunta: "MENCIONE SUS ÚLTIMOS 2 EMPLEOS ANTERIORES:", tip: "Empresa, dirección, tel, cargo, jefe y fechas.", tipo: "textarea" },
     { categoria: "PROFESIONAL", id: "organizaciones", pregunta: "¿PERTENECE A UNA ORGANIZACIÓN SOCIAL O PROFESIONAL?:", tip: "Colegios, sindicatos, clubes, etc.", tipo: "sino_texto" },
 
-    // --- SECCIÓN 3: CONSULADO Y VIAJE ---
-    { categoria: "CONSULADO Y VIAJE", id: "motivo_visita", pregunta: "¿CUÁL ES EL MOTIVO PRINCIPAL DE SU VIAJE?", tip: "Sé muy específico. Ej. 'Turismo, vacaciones y compras'.", tipo: "textarea" },
-    { categoria: "CONSULADO Y VIAJE", id: "lugar_pasaporte", pregunta: "LUGAR DE EMISIÓN DE SU PASAPORTE:", tip: "Revisa la página principal de tu pasaporte.", tipo: "text" },
-    { categoria: "CONSULADO Y VIAJE", id: "robo_pasaporte", pregunta: "¿ALGUNA VEZ LE HAN ROBADO/EXTRAVIADO UN PASAPORTE?", tip: "Si respondes Sí, especifica año y detalles.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "fecha_viaje", pregunta: "FECHA APROXIMADA PARA VIAJAR:", tip: "Abre el calendario y pon una fecha futura proyectada.", tipo: "date" },
-    { categoria: "CONSULADO Y VIAJE", id: "tiempo_estadía", pregunta: "TIEMPO QUE PERMANECERÁ EN EL DESTINO:", tip: "Ejemplo: 1 semana, 15 días.", tipo: "text" },
-    { categoria: "CONSULADO Y VIAJE", id: "hospedaje", pregunta: "LUGAR DE HOSPEDAJE EN EL DESTINO:", tip: "Nombre del Hotel o Nombre y Dirección del familiar/amigo.", tipo: "textarea" },
-    { categoria: "CONSULADO Y VIAJE", id: "quien_paga", pregunta: "QUIÉN CUBRE LOS GASTOS DE SU VIAJE:", tip: "Nombre, parentesco y teléfono (o 'Yo mismo').", tipo: "textarea" },
-    { categoria: "CONSULADO Y VIAJE", id: "acompanantes", pregunta: "¿HAY PERSONAS QUE VIAJAN CON USTED?", tip: "Si viajas con alguien, anota su nombre y parentesco.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "familiares_cercanos_eu", pregunta: "¿TIENE ESPOSO(A), PADRES, HERMANOS O HIJOS EN EL PAÍS DESTINO?", tip: "Nombre completo y Estatus de residencia/visa.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "otros_familiares_eu", pregunta: "¿TIENE ALGÚN OTRO FAMILIAR VIVIENDO EN EL PAÍS DESTINO?", tip: "Tíos, primos, etc.", tipo: "sino_texto" },
+    // --- SECCIÓN 3: CONSULADO Y VIAJE (NUEVOS PASOS COMPUESTOS) ---
+    
+    // BLOQUE VIAJE 1: PLAN DE VIAJE
+    { categoria: "CONSULADO Y VIAJE", id: "plan_viaje_combo", pregunta: "PLAN DE VIAJE AL DESTINO:", tip: "Motivo del viaje, fecha proyectada y días de estancia.", tipo: "plan_viaje_combo" },
+    
+    // BLOQUE VIAJE 2: LOGÍSTICA Y FINANCIAMIENTO
+    { categoria: "CONSULADO Y VIAJE", id: "logistica_viaje_combo", pregunta: "HOSPEDAJE Y FINANCIAMIENTO DEL VIAJE:", tip: "Lugar donde te hospedarás, quién cubre los gastos y si viajas acompañado.", tipo: "logistica_combo" },
+    
+    // BLOQUE VIAJE 3: CONTACTOS Y CONTACTO INTERNACIONAL
+    { categoria: "CONSULADO Y VIAJE", id: "contactos_y_viajes_combo", pregunta: "CONTACTOS EN EL DESTINO Y VIAJES INTERNACIONALES:", tip: "Familiares cercanos, otros familiares y viajes realizados en los últimos 5 años.", tipo: "contactos_combo" },
+    
+    // BLOQUE VIAJE 4: DATOS DEL PASAPORTE
+    { categoria: "CONSULADO Y VIAJE", id: "pasaporte_detalles_combo", pregunta: "DATOS DEL PASAPORTE Y ROBO/EXTRAVÍO:", tip: "Lugar de emisión y si has tenido reportes de pasaporte perdido.", tipo: "pasaporte_combo" },
 
     // --- OMITIDAS SI ES PRIMERA VEZ QUE VIAJA ---
     { categoria: "CONSULADO Y VIAJE", id: "visitas_anteriores", pregunta: "¿HA ESTADO ALGUNA VEZ EN EL PAÍS DESTINO? (FECHAS):", tip: "Revisa los sellos de tu pasaporte anterior.", tipo: "sino_texto" },
@@ -73,7 +75,6 @@ const cuestionarioBase = [
     { categoria: "CONSULADO Y VIAJE", id: "problemas_legales_eu", pregunta: "¿ALGUNA VEZ HA TENIDO ALGÚN INCONVENIENTE DE ENTRADA O TRÁMITE PREVIO EN ESE PAÍS?", tip: "Sé 100% honesto.", tipo: "sino_texto" },
     
     // --- SEGURIDAD GENERAL ---
-    { categoria: "CONSULADO Y VIAJE", id: "viajes_internacionales", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HA VIAJADO A OTRO PAÍS DIFERENTE AL TUYO O AL DESTINO?:", tip: "Menciona los países. Si es ninguno pon NO.", tipo: "sino_texto" },
     { categoria: "CONSULADO Y VIAJE", id: "seguridad", pregunta: "¿TIENE EXPERIENCIA EN ARMAS DE FUEGO O HA SERVIDO AL EJÉRCITO?:", tip: "Si respondes Sí, detalla tu experiencia.", tipo: "sino_texto" }
 ];
 
@@ -203,6 +204,7 @@ function renderScreen(pasoForzado = null) {
     document.getElementById('progressBar').style.width = ((progresoReal / TOTAL_PASOS) * 100) + "%";
 
     let paisActual = appData.pais_destino || "el país destino";
+    let paisLimpio = obtenerNombrePaisLimpio(paisActual);
 
     switch(step) {
         case 0: 
@@ -282,7 +284,7 @@ function renderScreen(pasoForzado = null) {
             let preguntaTexto = formatearTextoPregunta(q.pregunta, paisActual);
 
             html = `<p style="text-transform: uppercase; font-size: 13px; color: #666; margin-bottom:0; font-weight:bold;">Cuestionario: Pregunta ${idx + 1} de ${cuestionarioBase.length}</p>
-                    <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria} (${obtenerNombrePaisLimpio(paisActual)})</p>
+                    <p style="color: var(--color-acento); font-weight:bold; margin-top:5px; font-size:12px;">▶ SECCIÓN: ${q.categoria} (${paisLimpio})</p>
                     <h3 style="text-align: left; margin-top:5px;">${preguntaTexto}</h3>`;
 
             if (q.tipo === "direccion_mx") {
@@ -343,6 +345,67 @@ function renderScreen(pasoForzado = null) {
 
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">4. Descripción breve de Funciones:</label>
                     <textarea id="pst_funciones" placeholder="Describe tus tareas diarias usando oraciones completas...">${d.funciones}</textarea>
+                `;
+            }
+            // NUEVO COMBO 1: PLAN DE VIAJE
+            else if (q.tipo === "plan_viaje_combo") {
+                let d = {motivo: "", fecha: "", tiempo: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Motivo Principal de su Viaje:</label>
+                    <textarea id="pln_motivo" placeholder="Ej. Vacaciones, conocer casinos y teatros...">${d.motivo}</textarea>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha Aproximada para Viajar:</label>
+                    <input type="date" id="pln_fecha" value="${d.fecha}">
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. Tiempo que Permanecerá en el Destino:</label>
+                    <input type="text" id="pln_tiempo" value="${d.tiempo}" placeholder="Ej. 7 días / 2 semanas">
+                `;
+            }
+            // NUEVO COMBO 2: LOGÍSTICA Y FINANCIAMIENTO
+            else if (q.tipo === "logistica_combo") {
+                let d = {hospedaje: "", quienPaga: "", acompanantes: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Lugar de Hospedaje en el Destino:</label>
+                    <textarea id="log_hospedaje" placeholder="Nombre del hotel o dirección de familiares/amigos...">${d.hospedaje}</textarea>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Quién Cubre los Gastos de su Viaje:</label>
+                    <textarea id="log_quienPaga" placeholder="Ej. Yo mismo / Empresa / Nombre del familiar...">${d.quienPaga}</textarea>
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. ¿Hay personas que viajan con usted?:</label>
+                    <textarea id="log_acompanantes" placeholder="Si viajas acompañado, anota nombres y parentesco. Si vas solo pon 'No'">${d.acompanantes}</textarea>
+                `;
+            }
+            // NUEVO COMBO 3: CONTACTOS Y VIAJES
+            else if (q.tipo === "contactos_combo") {
+                let d = {familiaresCercanos: "", otrosFamiliares: "", viajesAnteriores: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. ¿Tiene Esposo(a), Padres, Hermanos o Hijos en ${paisLimpio}?:</label>
+                    <textarea id="cnt_cercanos" placeholder="Si tienes, anota nombre completo y estatus. Si no tienes pon 'No'">${d.familiaresCercanos}</textarea>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Tiene algún otro familiar viviendo en ${paisLimpio}?:</label>
+                    <textarea id="cnt_otros" placeholder="Tíos, primos, etc. Si no tienes pon 'No'">${d.otrosFamiliares}</textarea>
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. En los últimos 5 años ¿ha viajado a otro país diferente al tuyo o al destino?:</label>
+                    <textarea id="cnt_viajes" placeholder="Escribe los países visitados. Si no has salido pon 'No'">${d.viajesAnteriores}</textarea>
+                `;
+            }
+            // NUEVO COMBO 4: PASAPORTE Y ROBO
+            else if (q.tipo === "pasaporte_combo") {
+                let d = {lugarEmision: "", robo: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Lugar de Emisión de su Pasaporte:</label>
+                    <input type="text" id="psp_emision" value="${d.lugarEmision}" placeholder="Ej. Durango / Culiacán / CDMX">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Alguna vez le han robado o extraviado un pasaporte?:</label>
+                    <textarea id="psp_robo" placeholder="Si la respuesta es 'Sí', detalla el año y circunstancia. Si no pon 'No'">${d.robo}</textarea>
                 `;
             }
             else if (q.tipo === "sino_texto") {
@@ -523,6 +586,42 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(!pst || !ant || !sld || !fnc) { mostrarAlerta("Por favor completa todos los campos de tu puesto actual."); return; }
         v = JSON.stringify({puesto: pst, antiguedad: ant, sueldo: sld, funciones: fnc});
     }
+    else if(tipo === "plan_viaje_combo") {
+        let mot = document.getElementById('pln_motivo').value.trim();
+        let fch = document.getElementById('pln_fecha').value.trim();
+        let tmp = document.getElementById('pln_tiempo').value.trim();
+
+        if(!mot || !fch || !tmp) { mostrarAlerta("Por favor completa todos los datos de tu plan de viaje."); return; }
+        
+        let hoy = new Date(); hoy.setHours(0,0,0,0);
+        let fechaIngresada = new Date(fch + 'T00:00:00');
+        if (fechaIngresada <= hoy) { mostrarAlerta("La fecha de viaje debe ser posterior a hoy."); return; }
+
+        v = JSON.stringify({motivo: mot, fecha: fch, tiempo: tmp});
+    }
+    else if(tipo === "logistica_combo") {
+        let hsp = document.getElementById('log_hospedaje').value.trim();
+        let pag = document.getElementById('log_quienPaga').value.trim();
+        let acm = document.getElementById('log_acompanantes').value.trim();
+
+        if(!hsp || !pag || !acm) { mostrarAlerta("Por favor completa todos los datos de hospedaje y financiamiento."); return; }
+        v = JSON.stringify({hospedaje: hsp, quienPaga: pag, acompanantes: acm});
+    }
+    else if(tipo === "contactos_combo") {
+        let crc = document.getElementById('cnt_cercanos').value.trim();
+        let otr = document.getElementById('cnt_otros').value.trim();
+        let vjs = document.getElementById('cnt_viajes').value.trim();
+
+        if(!crc || !otr || !vjs) { mostrarAlerta("Por favor completa las 3 preguntas de esta sección."); return; }
+        v = JSON.stringify({familiaresCercanos: crc, otrosFamiliares: otr, viajesAnteriores: vjs});
+    }
+    else if(tipo === "pasaporte_combo") {
+        let emi = document.getElementById('psp_emision').value.trim();
+        let rbo = document.getElementById('psp_robo').value.trim();
+
+        if(!emi || !rbo) { mostrarAlerta("Por favor completa los datos de emisión y estado de pasaporte."); return; }
+        v = JSON.stringify({lugarEmision: emi, robo: rbo});
+    }
     else if(tipo === "sino_texto") {
         let sino = document.getElementById('respuestaDS160_sino').value;
         if(!sino) { mostrarAlerta("Por favor, selecciona Sí o No."); return; }
@@ -555,11 +654,6 @@ function guardarRespuestaCuestionario(id, tipo) {
             let hoy = new Date(); hoy.setHours(0,0,0,0);
             let fechaIngresada = new Date(v + 'T00:00:00');
             if (fechaIngresada >= hoy) { mostrarAlerta("La fecha de nacimiento no puede ser hoy ni futura."); return; }
-        }
-        if (id === "fecha_viaje") {
-            let hoy = new Date(); hoy.setHours(0,0,0,0);
-            let fechaIngresada = new Date(v + 'T00:00:00');
-            if (fechaIngresada <= hoy) { mostrarAlerta("La fecha de viaje debe ser posterior a hoy."); return; }
         }
     }
     
@@ -665,6 +759,14 @@ function mostrarResumen() {
                     valor = `Empresa/Institución: ${obj.nombre}\nDirección: ${obj.direccion}`;
                 } else if(obj.puesto) {
                     valor = `Puesto: ${obj.puesto}\nAntigüedad: ${obj.antiguedad} años\nSueldo Mensual: ${obj.sueldo}\nFunciones:\n${obj.funciones}`;
+                } else if(obj.motivo) {
+                    valor = `Motivo del Viaje: ${obj.motivo}\nFecha Aproximada: ${obj.fecha}\nTiempo de Permanencia: ${obj.tiempo}`;
+                } else if(obj.hospedaje) {
+                    valor = `Hospedaje: ${obj.hospedaje}\nQuién Paga: ${obj.quienPaga}\nAcompañantes: ${obj.acompanantes}`;
+                } else if(obj.familiaresCercanos) {
+                    valor = `Familiares Cercanos en Destino: ${obj.familiaresCercanos}\nOtros Familiares en Destino: ${obj.otrosFamiliares}\nViajes Últimos 5 Años: ${obj.viajesAnteriores}`;
+                } else if(obj.lugarEmision) {
+                    valor = `Lugar de Emisión del Pasaporte: ${obj.lugarEmision}\nHistorial de Robo/Extravío: ${obj.robo}`;
                 }
             } catch(e) {}
         }
