@@ -31,10 +31,8 @@ const cuestionarioBase = [
     { categoria: "PERSONAL", id: "redes_sociales", pregunta: "REDES SOCIALES (FACEBOOK, INSTAGRAM, ETC):", tip: "⚠️ IMPORTANTE: Escribe tu usuario exacto o enlace (Ej. facebook.com/juanperez). Los consulados verifican estas cuentas.", tipo: "textarea" },
     { categoria: "PERSONAL", id: "historial_contacto", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HAS USADO OTROS TELÉFONOS/EMAILS?", tip: "Si respondes Sí, anótalos detalladamente.", tipo: "sino_texto" },
     
-    // --- DATOS DE PADRES ---
-    { categoria: "PERSONAL", id: "datos_padres", pregunta: "NOMBRE Y FECHA DE NACIMIENTO DE SU PADRE Y MADRE:", tip: "⚠️ OBLIGATORIO: Nombres completos (con apellidos) y fechas de nacimiento de AMBOS. Aunque hayan fallecido.", tipo: "textarea" },
-    { categoria: "PERSONAL", id: "ocupacion_padres", pregunta: "¿A QUÉ SE DEDICAN SUS PADRES?", tip: "Aunque estén jubilados o fallecidos, especificarlo.", tipo: "textarea" },
-    { categoria: "PERSONAL", id: "idiomas", pregunta: "IDIOMAS QUE DOMINA AL 100%:", tip: "Ej. Español, Inglés.", tipo: "text" },
+    // --- DATOS DE PADRES (PASO UNIFICADO) ---
+    { categoria: "PERSONAL", id: "padres_combo", pregunta: "INFORMACIÓN DE SUS PADRES:", tip: "⚠️ OBLIGATORIO: Nombres completos, fechas de nacimiento y ocupación de AMBOS padres (aunque hayan fallecido o estén jubilados).", tipo: "padres_combo" },
     
     // --- PROPIEDADES (ARRAIGO PERSONAL) ---
     { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
@@ -293,6 +291,18 @@ function renderScreen(pasoForzado = null) {
                     <div id="direccion_detalles" style="display:none; border-top: 1px solid #ccc; padding-top: 15px;"><p id="msg_estado" style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0;"></p><label>2. Colonia:</label><select id="colonia_select"></select><label style="margin-top: 10px; display:block;">3. Calle y Número:</label><input type="text" id="calle_input" placeholder="Ej. Calle 123"></div>
                     ${respuestaPrevia ? `<p style="font-size:13px; color:var(--color-primario);"><b>Guardado:</b><br>${respuestaPrevia}</p>` : ''}</div>`;
             } 
+            else if (q.tipo === "padres_combo") {
+                let d = {nombres: "", ocupacion: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombres y Fechas de Nacimiento de Padre y Madre:</label>
+                    <textarea id="pad_nombres" placeholder="Ej. Juan Pérez (01/Ene/1960) y María López (05/May/1962)...">${d.nombres}</textarea>
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿A qué se dedican sus padres?:</label>
+                    <textarea id="pad_ocupacion" placeholder="Ej. Mi padre es comerciante y mi madre es ama de casa (o fallecidos)...">${d.ocupacion}</textarea>
+                `;
+            }
             else if (q.tipo === "educacion_combo") {
                 let datosEdu = {nivel: "", especialidad: "", escuelas: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { datosEdu = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -347,7 +357,6 @@ function renderScreen(pasoForzado = null) {
                     <textarea id="pst_funciones" placeholder="Describe tus tareas diarias usando oraciones completas...">${d.funciones}</textarea>
                 `;
             }
-            // NUEVO COMBO 1: PLAN DE VIAJE
             else if (q.tipo === "plan_viaje_combo") {
                 let d = {motivo: "", fecha: "", tiempo: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -363,7 +372,6 @@ function renderScreen(pasoForzado = null) {
                     <input type="text" id="pln_tiempo" value="${d.tiempo}" placeholder="Ej. 7 días / 2 semanas">
                 `;
             }
-            // NUEVO COMBO 2: LOGÍSTICA Y FINANCIAMIENTO
             else if (q.tipo === "logistica_combo") {
                 let d = {hospedaje: "", quienPaga: "", acompanantes: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -379,7 +387,6 @@ function renderScreen(pasoForzado = null) {
                     <textarea id="log_acompanantes" placeholder="Si viajas acompañado, anota nombres y parentesco. Si vas solo pon 'No'">${d.acompanantes}</textarea>
                 `;
             }
-            // NUEVO COMBO 3: CONTACTOS Y VIAJES
             else if (q.tipo === "contactos_combo") {
                 let d = {familiaresCercanos: "", otrosFamiliares: "", viajesAnteriores: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -395,7 +402,6 @@ function renderScreen(pasoForzado = null) {
                     <textarea id="cnt_viajes" placeholder="Escribe los países visitados. Si no has salido pon 'No'">${d.viajesAnteriores}</textarea>
                 `;
             }
-            // NUEVO COMBO 4: PASAPORTE Y ROBO
             else if (q.tipo === "pasaporte_combo") {
                 let d = {lugarEmision: "", robo: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -559,6 +565,14 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(ca.length < 3) { mostrarAlerta("La calle debe ser más descriptiva."); return; }
         v = `${ca}, Col. ${co}, C.P. ${cp}`;
     } 
+    else if(tipo === "padres_combo") {
+        let nom = document.getElementById('pad_nombres').value.trim();
+        let ocu = document.getElementById('pad_ocupacion').value.trim();
+
+        if(!nom || !ocu) { mostrarAlerta("Por favor completa los nombres y ocupaciones de ambos padres."); return; }
+        if(nom.length < 5 || ocu.length < 3) { mostrarAlerta("Por favor detalla mejor la información de tus padres."); return; }
+        v = JSON.stringify({nombres: nom, ocupacion: ocu});
+    }
     else if(tipo === "educacion_combo") {
         let n = document.getElementById('edu_nivel').value;
         let esc = document.getElementById('edu_escuelas').value.trim();
@@ -753,20 +767,22 @@ function mostrarResumen() {
         if(typeof valor === 'string' && valor.startsWith("{")) {
             try {
                 let obj = JSON.parse(valor);
-                if(obj.nivel) {
+                if(obj.nivel !== undefined) {
                     valor = `Nivel: ${obj.nivel}\nEspecialidad: ${obj.especialidad || 'N/A'}\nInstituciones:\n${obj.escuelas}`;
-                } else if(obj.nombre) {
+                } else if(obj.nombre !== undefined && obj.direccion !== undefined) {
                     valor = `Empresa/Institución: ${obj.nombre}\nDirección: ${obj.direccion}`;
-                } else if(obj.puesto) {
+                } else if(obj.puesto !== undefined) {
                     valor = `Puesto: ${obj.puesto}\nAntigüedad: ${obj.antiguedad} años\nSueldo Mensual: ${obj.sueldo}\nFunciones:\n${obj.funciones}`;
-                } else if(obj.motivo) {
+                } else if(obj.motivo !== undefined) {
                     valor = `Motivo del Viaje: ${obj.motivo}\nFecha Aproximada: ${obj.fecha}\nTiempo de Permanencia: ${obj.tiempo}`;
-                } else if(obj.hospedaje) {
+                } else if(obj.hospedaje !== undefined) {
                     valor = `Hospedaje: ${obj.hospedaje}\nQuién Paga: ${obj.quienPaga}\nAcompañantes: ${obj.acompanantes}`;
-                } else if(obj.familiaresCercanos) {
+                } else if(obj.familiaresCercanos !== undefined) {
                     valor = `Familiares Cercanos en Destino: ${obj.familiaresCercanos}\nOtros Familiares en Destino: ${obj.otrosFamiliares}\nViajes Últimos 5 Años: ${obj.viajesAnteriores}`;
-                } else if(obj.lugarEmision) {
+                } else if(obj.lugarEmision !== undefined) {
                     valor = `Lugar de Emisión del Pasaporte: ${obj.lugarEmision}\nHistorial de Robo/Extravío: ${obj.robo}`;
+                } else if(obj.nombres !== undefined && obj.ocupacion !== undefined) {
+                    valor = `Nombres y Fechas de Nacimiento:\n${obj.nombres}\nOcupación:\n${obj.ocupacion}`;
                 }
             } catch(e) {}
         }
