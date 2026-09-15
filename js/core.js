@@ -393,7 +393,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre de la Empresa o Institución:</label>
-                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Grupo Dportenis / Freelance / Ama de casa">
+                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Empresa / Freelance / Ama de casa">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Dirección Completa y Teléfono:</label>
                     <textarea id="emp_direccion" placeholder="Calle, número, colonia, ciudad, estado y teléfono de contacto...">${d.direccion}</textarea>
