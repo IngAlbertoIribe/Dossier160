@@ -1,5 +1,5 @@
 {
-  "id": "/Dossier160/",
+  "id": "./",
   "name": "Dossier160",
   "short_name": "Dossier160",
   "description": "Formulario inteligente para capturar tu perfil profesional y organizar tu expediente de forma segura.",
@@ -14,7 +14,13 @@
       "src": "./assets/icono.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icono.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
