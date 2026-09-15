@@ -357,7 +357,7 @@ function renderScreen(pasoForzado = null) {
                     <input type="date" id="esp_fecha" value="${d.fecha || ''}">
 
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. Lugar de Nacimiento:</label>
-                    <input type="text" id="esp_lugar" value="${d.lugar || ''}" placeholder="Ej. Ciudad Valles, San Luis Potosí">
+                    <input type="text" id="esp_lugar" value="${d.lugar || ''}" placeholder="Ej. Guadalajara, Jalisco">
                 `;
             }
             else if (q.tipo === "padres_combo") {
@@ -390,7 +390,7 @@ function renderScreen(pasoForzado = null) {
                     
                     <div id="div_especialidad" style="display: ${requiereEspecialidad ? 'block' : 'none'};">
                         <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block; color: var(--color-primario);">2. Especialidad / Carrera:</label>
-                        <input type="text" id="edu_especialidad" value="${datosEdu.especialidad && datosEdu.especialidad !== 'No aplica' ? datosEdu.especialidad : ''}" placeholder="Ej. Ing. en Sistemas">
+                        <input type="text" id="edu_especialidad" value="${datosEdu.especialidad && datosEdu.especialidad !== 'No aplica' ? datosEdu.especialidad : ''}" placeholder="Ej. Abogado">
                     </div>
 
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">3. Instituciones a las que asistió:</label>
@@ -525,7 +525,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Lugar de Emisión de su Pasaporte:</label>
-                    <input type="text" id="psp_emision" value="${d.lugarEmision || ''}" placeholder="Ej. Durango / Culiacán / CDMX">
+                    <input type="text" id="psp_emision" value="${d.lugarEmision || ''}" placeholder="Ej. Guadalajara / CDMX">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Alguna vez le han robado o extraviado un pasaporte?:</label>
                     <select id="psp_robo_sino" onchange="document.getElementById('div_psp_robo').style.display = this.value === 'Sí' ? 'block' : 'none'">
