@@ -347,7 +347,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre de la Empresa o Institución:</label>
-                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Grupo Dportenis / Freelance / Ama de casa">
+                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Empresa / Freelance / Ama de casa">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Dirección Completa y Teléfono:</label>
                     <textarea id="emp_direccion" placeholder="Calle, número, colonia, ciudad, estado y teléfono de contacto...">${d.direccion}</textarea>
@@ -387,7 +387,7 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "logistica_combo") {
-                let d = {hospedaje: "", quienPaga: "", acompanantes: ""};
+                let d = {hospedaje: "", quienPaga: "", acompanantes_sino: "", acompanantes_det: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
 
                 html += `
@@ -398,7 +398,15 @@ function renderScreen(pasoForzado = null) {
                     <textarea id="log_quienPaga" placeholder="Ej. Yo mismo / Empresa / Nombre del familiar...">${d.quienPaga}</textarea>
 
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. ¿Hay personas que viajan con usted?:</label>
-                    <textarea id="log_acompanantes" placeholder="Si viajas acompañado, anota nombres y parentesco. Si vas solo pon 'No'">${d.acompanantes}</textarea>
+                    <select id="log_acompanantes_sino" onchange="document.getElementById('div_log_acompanantes').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.acompanantes_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.acompanantes_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_log_acompanantes" style="display: ${d.acompanantes_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Ingresa los nombres completos y parentesco de tus acompañantes:</label>
+                        <textarea id="log_acompanantes_det" placeholder="Escribe los nombres y parentesco aquí...">${d.acompanantes_det || ''}</textarea>
+                    </div>
                 `;
             }
             else if (q.tipo === "contactos_combo") {
@@ -691,10 +699,25 @@ function guardarRespuestaCuestionario(id, tipo) {
     else if(tipo === "logistica_combo") {
         let hsp = document.getElementById('log_hospedaje').value.trim();
         let pag = document.getElementById('log_quienPaga').value.trim();
-        let acm = document.getElementById('log_acompanantes').value.trim();
+        let acm_sino = document.getElementById('log_acompanantes_sino').value;
+        let acm_det = document.getElementById('log_acompanantes_det').value.trim();
 
-        if(!hsp || !pag || !acm) { mostrarAlerta("Por favor completa todos los datos de hospedaje y financiamiento."); return; }
-        v = JSON.stringify({hospedaje: hsp, quienPaga: pag, acompanantes: acm});
+        if(!hsp || !pag || !acm_sino) { 
+            mostrarAlerta("Por favor completa hospedaje, quién paga y si viajas acompañado."); 
+            return; 
+        }
+
+        if(acm_sino === 'Sí' && acm_det.length < 3) {
+            mostrarAlerta("Seleccionaste que viajas acompañado. Por favor ingresa los detalles de tus acompañantes.");
+            return;
+        }
+
+        v = JSON.stringify({
+            hospedaje: hsp, 
+            quienPaga: pag, 
+            acompanantes_sino: acm_sino, 
+            acompanantes_det: acm_sino === 'Sí' ? acm_det : 'No'
+        });
     }
     else if(tipo === "contactos_combo") {
         let crc_sino = document.getElementById('cnt_cercanos_sino').value;
@@ -892,6 +915,8 @@ function mostrarResumen() {
                     valor = `Puesto: ${obj.puesto}\nAntigüedad: ${obj.antiguedad} años\nSueldo Mensual: ${obj.sueldo}\nFunciones:\n${obj.funciones}`;
                 } else if(obj.motivo !== undefined) {
                     valor = `Motivo del Viaje: ${obj.motivo}\nFecha Aproximada: ${obj.fecha}\nTiempo de Permanencia: ${obj.tiempo}`;
+                } else if(obj.acompanantes_sino !== undefined) {
+                    valor = `Hospedaje: ${obj.hospedaje}\nQuién Paga: ${obj.quienPaga}\nViaja Acompañado: ${obj.acompanantes_sino}` + (obj.acompanantes_sino === 'Sí' ? ` (${obj.acompanantes_det})` : '');
                 } else if(obj.hospedaje !== undefined) {
                     valor = `Hospedaje: ${obj.hospedaje}\nQuién Paga: ${obj.quienPaga}\nAcompañantes: ${obj.acompanantes}`;
                 } else if(obj.cercanos_sino !== undefined) {
