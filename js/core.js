@@ -110,11 +110,35 @@ function formatearTextoPregunta(textoOriginal, paisActual) {
         .replace("PAÍS DESTINO", paisLimpio);
 }
 
-// --- FUNCIONES AUXILIARES ---
+// --- FUNCIONES AUXILIARES Y MODALES ---
 
 function mostrarAlerta(mensaje) {
+    let modal = document.getElementById('customModal');
+    let acciones = document.getElementById('modalActions');
+    
     document.getElementById('modalMessage').innerText = mensaje;
-    document.getElementById('customModal').style.display = 'flex';
+    
+    if (acciones) {
+        acciones.innerHTML = `<button onclick="cerrarModal()">Aceptar</button>`;
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function mostrarConfirmacion(mensaje, funcionAceptar) {
+    let modal = document.getElementById('customModal');
+    let acciones = document.getElementById('modalActions');
+    
+    document.getElementById('modalMessage').innerText = mensaje;
+    
+    if (acciones) {
+        acciones.innerHTML = `
+            <button onclick="${funcionAceptar}(); cerrarModal();" style="background: var(--color-acento, #e53935); color: white;">Sí, borrar</button>
+            <button onclick="cerrarModal()" class="secondary" style="margin-left: 10px;">No, cancelar</button>
+        `;
+    }
+    
+    modal.style.display = 'flex';
 }
 
 function cerrarModal() {
@@ -525,7 +549,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Lugar de Emisión de su Pasaporte:</label>
-                    <input type="text" id="psp_emision" value="${d.lugarEmision || ''}" placeholder="Ej. Guadalajara / CDMX">
+                    <input type="text" id="psp_emision" value="${d.lugarEmision || ''}" placeholder="Ej. Durango / Culiacán / CDMX">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Alguna vez le han robado o extraviado un pasaporte?:</label>
                     <select id="psp_robo_sino" onchange="document.getElementById('div_psp_robo').style.display = this.value === 'Sí' ? 'block' : 'none'">
@@ -719,7 +743,7 @@ function renderScreen(pasoForzado = null) {
             <p>Solicitud de viaje en proceso para: <b>${paisActual}</b></p>
             <button class="success" onclick="renderScreen(${appData.paso_actual})">🚀 Continuar Mi Expediente</button>
             <br>
-            <button onclick="resetApp()" style="background:none; color:red; border:none; margin-top:20px; text-decoration:underline; cursor:pointer;">Borrar mis datos y empezar de nuevo</button>
+            <button onclick="confirmarBorrado()" style="background:none; color:red; border:none; margin-top:20px; text-decoration:underline; cursor:pointer;">Borrar mis datos y empezar de nuevo</button>
         `;
     }
     document.getElementById('screenContent').innerHTML = html;
@@ -1031,12 +1055,18 @@ function guardarCita(t, p) {
     avanzarPaso(p);
 }
 
+function confirmarBorrado() {
+    mostrarConfirmacion("¿Estás seguro de borrar todos tus datos y reiniciar tu solicitud?", "ejecutarResetApp");
+}
+
+function ejecutarResetApp() { 
+    localStorage.removeItem('datosVisado'); 
+    appData = { paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    renderScreen(0); 
+}
+
 function resetApp() { 
-    if(confirm("¿Estás seguro de borrar todos tus datos y reiniciar tu solicitud?")) { 
-        localStorage.removeItem('datosVisado'); 
-        appData = { paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
-        renderScreen(0); 
-    } 
+    confirmarBorrado();
 }
 
 function regresarAUltimaPregunta() {
@@ -1179,7 +1209,7 @@ function mostrarResumen() {
         
         <hr style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0 15px 0;">
         <p style="font-size: 14px; color: #666; margin-bottom: 10px;">¿Terminaste con este expediente?</p>
-        <button onclick="resetApp()" style="background: var(--color-acento); color: white;">🗑️ Crear Nueva Solicitud</button>
+        <button onclick="confirmarBorrado()" style="background: var(--color-acento); color: white;">🗑️ Crear Nueva Solicitud</button>
     `;
     
     document.getElementById('screenContent').innerHTML = pantallaFinal;
