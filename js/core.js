@@ -18,7 +18,7 @@ const cuestionarioBase = [
     // PASO UNIFICADO 3: TELÉFONOS, REDES SOCIALES E HISTORIAL DE CONTACTO
     { categoria: "PERSONAL", id: "contacto_redes_combo", pregunta: "TELÉFONOS, REDES SOCIALES E HISTORIAL DE CONTACTO:", tip: "⚠️ IMPORTANTE: Números donde puedan localizarte, tus usuarios o enlaces exactos (Ej. facebook.com/juanperez) e historial de teléfonos/emails usados previamente. Los consulados verifican estas cuentas.", tipo: "contacto_redes_combo" },
 
-    // REUBICADA: PROPIEDADES (ARRAIGO PERSONAL)
+    // PROPIEDADES (ARRAIGO PERSONAL)
     { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
     { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero' o 'Divorciado', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
@@ -67,16 +67,16 @@ const cuestionarioBase = [
     // --- OMITIDAS SI ES PRIMERA VEZ QUE VIAJA ---
     { categoria: "CONSULADO Y VIAJE", id: "visitas_anteriores", pregunta: "¿HA ESTADO ALGUNA VEZ EN EL PAÍS DESTINO? (FECHAS):", tip: "Revisa los sellos de tu pasaporte anterior.", tipo: "sino_texto" },
     { categoria: "CONSULADO Y VIAJE", id: "licencia_eu", pregunta: "¿TIENE LICENCIA DE CONDUCIR O ID DEL PAÍS DESTINO?:", tip: "Si tienes, anota el número.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "visas_anteriores", pregunta: "¿ALGUNA VEZ LE HAN OTORGADO UNA VISA DE ESTE PAÍS?:", tip: "Fecha de emisión y si te tomaron datos biométricos.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "visa_robada", pregunta: "¿ALGUNA VEZ LE ROBARON, EXTRAVIÓ O REVOCARON UNA VISA?:", tip: "Explica brevemente y pon el año.", tipo: "sino_texto" },
-    { categoria: "CONSULADO Y VIAJE", id: "problemas_legales_eu", pregunta: "¿ALGUNA VEZ HA TENIDO ALGÚN INCONVENIENTE DE ENTRADA O TRÁMITE PREVIO EN ESE PAÍS?", tip: "Sé 100% honesto.", tipo: "sino_texto" },
+    
+    // PASO UNIFICADO DE HISTORIAL DE VISAS E INCONVENIENTES PREVIOS
+    { categoria: "CONSULADO Y VIAJE", id: "visas_historial_combo", pregunta: "HISTORIAL DE VISAS E INCONVENIENTES EN EL DESTINO:", tip: "⚠️ IMPORTANTE: Información exacta sobre visas otorgadas, pérdidas/revocadas o problemas de trámite/entrada previos.", tipo: "visas_historial_combo" },
     
     // --- SEGURIDAD GENERAL ---
     { categoria: "CONSULADO Y VIAJE", id: "seguridad", pregunta: "¿TIENE EXPERIENCIA EN ARMAS DE FUEGO O HA SERVIDO AL EJÉRCITO?:", tip: "Si respondes Sí, detalla tu experiencia.", tipo: "sino_texto" }
 ];
 
 // --- CONSTANTES DE OMISIÓN ---
-const PREGUNTAS_A_OMITIR_PRIMERA_VEZ = ['ssn_tax_id', 'visitas_anteriores', 'licencia_eu', 'visas_anteriores', 'visa_robada', 'problemas_legales_eu'];
+const PREGUNTAS_A_OMITIR_PRIMERA_VEZ = ['ssn_tax_id', 'visitas_anteriores', 'licencia_eu', 'visas_historial_combo'];
 const PREGUNTAS_A_OMITIR_SOLTERO = ['esposo_combo'];
 
 // --- CONSTANTES DE FLUJO ---
@@ -432,7 +432,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Motivo Principal de su Viaje:</label>
-                    <textarea id="pln_motivo" placeholder="Ej. Vacaciones en Disney, conocer casinos y teatros...">${d.motivo}</textarea>
+                    <textarea id="pln_motivo" placeholder="Ej. Vacaciones, conocer casinos y teatros...">${d.motivo}</textarea>
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha Aproximada para Viajar:</label>
                     <input type="date" id="pln_fecha" value="${d.fecha}">
@@ -536,6 +536,58 @@ function renderScreen(pasoForzado = null) {
                     <div id="div_psp_robo" style="display: ${d.robo_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
                         <label style="font-size:13px; color: var(--color-primario);">Detalla el año y las circunstancias del robo o extravío:</label>
                         <textarea id="psp_robo_det" placeholder="Escribe los detalles aquí...">${d.robo_det || ''}</textarea>
+                    </div>
+                `;
+            }
+            else if (q.tipo === "visas_historial_combo") {
+                let d = {
+                    otorgada_sino: "", otorgada_det: "",
+                    perdidarobada_sino: "", perdidarobada_det: "",
+                    problemas_sino: "", problemas_det: ""
+                };
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <!-- 1. VISA OTORGADA -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">
+                        1. ¿Alguna vez le han otorgado una visa de ${paisLimpio}?:
+                    </label>
+                    <select id="vis_otorgada_sino" onchange="document.getElementById('div_vis_otorgada').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.otorgada_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.otorgada_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_vis_otorgada" style="display: ${d.otorgada_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Especifica fecha de emisión y si te tomaron biométricos:</label>
+                        <textarea id="vis_otorgada_det" placeholder="Escribe los detalles aquí...">${d.otorgada_det || ''}</textarea>
+                    </div>
+
+                    <!-- 2. VISA ROBADA/EXTRAVIADA/REVOCADA -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        2. ¿Alguna vez le robaron, extravió o revocaron una visa de ${paisLimpio}?:
+                    </label>
+                    <select id="vis_perdidarobada_sino" onchange="document.getElementById('div_vis_perdidarobada').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.perdidarobada_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.perdidarobada_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_vis_perdidarobada" style="display: ${d.perdidarobada_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Explica brevemente la circunstancia y el año:</label>
+                        <textarea id="vis_perdidarobada_det" placeholder="Escribe los detalles aquí...">${d.perdidarobada_det || ''}</textarea>
+                    </div>
+
+                    <!-- 3. INCONVENIENTE DE ENTRADA O TRÁMITE -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        3. ¿Alguna vez ha tenido algún inconveniente de entrada o trámite previo en ${paisLimpio}?:
+                    </label>
+                    <select id="vis_problemas_sino" onchange="document.getElementById('div_vis_problemas').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.problemas_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.problemas_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_vis_problemas" style="display: ${d.problemas_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Explica la situación con total honestidad:</label>
+                        <textarea id="vis_problemas_det" placeholder="Escribe los detalles aquí...">${d.problemas_det || ''}</textarea>
                     </div>
                 `;
             }
@@ -883,6 +935,40 @@ function guardarRespuestaCuestionario(id, tipo) {
             robo_det: rbo_sino === 'Sí' ? rbo_det : 'No'
         });
     }
+    else if(tipo === "visas_historial_combo") {
+        let otg_sino = document.getElementById('vis_otorgada_sino').value;
+        let otg_det  = document.getElementById('vis_otorgada_det').value.trim();
+
+        let prv_sino = document.getElementById('vis_perdidarobada_sino').value;
+        let prv_det  = document.getElementById('vis_perdidarobada_det').value.trim();
+
+        let prb_sino = document.getElementById('vis_problemas_sino').value;
+        let prb_det  = document.getElementById('vis_problemas_det').value.trim();
+
+        if(!otg_sino || !prv_sino || !prb_sino) { 
+            mostrarAlerta("Por favor responde Sí o No a las 3 preguntas de esta sección."); 
+            return; 
+        }
+
+        if(otg_sino === 'Sí' && otg_det.length < 3) {
+            mostrarAlerta("Seleccionaste que te han otorgado una visa. Por favor ingresa los detalles.");
+            return;
+        }
+        if(prv_sino === 'Sí' && prv_det.length < 3) {
+            mostrarAlerta("Seleccionaste que te han robado, extraviado o revocado una visa. Por favor ingresa los detalles.");
+            return;
+        }
+        if(prb_sino === 'Sí' && prb_det.length < 3) {
+            mostrarAlerta("Seleccionaste que has tenido inconvenientes previos. Por favor ingresa los detalles.");
+            return;
+        }
+
+        v = JSON.stringify({
+            otorgada_sino: otg_sino, otorgada_det: otg_sino === 'Sí' ? otg_det : 'No',
+            perdidarobada_sino: prv_sino, perdidarobada_det: prv_sino === 'Sí' ? prv_det : 'No',
+            problemas_sino: prb_sino, problemas_det: prb_sino === 'Sí' ? prb_det : 'No'
+        });
+    }
     else if(tipo === "sino_texto") {
         let sino = document.getElementById('respuestaDS160_sino').value;
         if(!sino) { mostrarAlerta("Por favor, selecciona Sí o No."); return; }
@@ -1031,6 +1117,10 @@ function mostrarResumen() {
                             `\nViajes Últimos 5 Años: ${obj.viajes_sino}` + (obj.viajes_sino === 'Sí' ? ` (${obj.viajes_det})` : '');
                 } else if(obj.familiaresCercanos !== undefined) {
                     valor = `Familiares Cercanos en Destino: ${obj.familiaresCercanos}\nOtros Familiares en Destino: ${obj.otrosFamiliares}\nViajes Últimos 5 Años: ${obj.viajesAnteriores}`;
+                } else if(obj.otorgada_sino !== undefined) {
+                    valor = `Visa Otorgada Previamente: ${obj.otorgada_sino}` + (obj.otorgada_sino === 'Sí' ? ` (${obj.otorgada_det})` : '') +
+                            `\nVisa Robada/Extraviada/Revocada: ${obj.perdidarobada_sino}` + (obj.perdidarobada_sino === 'Sí' ? ` (${obj.perdidarobada_det})` : '') +
+                            `\nInconveniente de Entrada/Trámite: ${obj.problemas_sino}` + (obj.problemas_sino === 'Sí' ? ` (${obj.problemas_det})` : '');
                 } else if(obj.robo_sino !== undefined) {
                     valor = `Lugar de Emisión del Pasaporte: ${obj.lugarEmision}\nPasaporte Robado/Extraviado: ${obj.robo_sino}` + (obj.robo_sino === 'Sí' ? ` (${obj.robo_det})` : '');
                 } else if(obj.lugarEmision !== undefined) {
