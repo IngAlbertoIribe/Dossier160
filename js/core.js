@@ -10,12 +10,10 @@ const cuestionarioBase = [
     // PASO UNIFICADO: NOMBRE Y FECHA DE NACIMIENTO
     { categoria: "PERSONAL", id: "nombre_nacimiento_combo", pregunta: "NOMBRE COMPLETO Y FECHA DE NACIMIENTO:", tip: "Ingresa tu nombre exactamente como aparece en tu pasaporte y tu fecha de nacimiento.", tipo: "nombre_nacimiento_combo" },
     
-    { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
+    { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero' o 'Divorciado', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
     
-    // Omitidas si es Soltero o Divorciado
-    { categoria: "PERSONAL", id: "nombre_esposo", pregunta: "NOMBRE COMPLETO DE SU ESPOSO(A) / EX-ESPOSO(A):", tip: "⚠️ OBLIGATORIO: Nombre completo con apellidos.", tipo: "text" },
-    { categoria: "PERSONAL", id: "fecha_esposo", pregunta: "FECHA DE NACIMIENTO DE SU ESPOSO(A):", tip: "Abre el calendario y selecciona la fecha exacta.", tipo: "date" },
-    { categoria: "PERSONAL", id: "lugar_esposo", pregunta: "LUGAR DE NACIMIENTO DE SU ESPOSO(A):", tip: "Ej. Ciudad Valles, San Luis Potosí.", tipo: "text" },
+    // PASO UNIFICADO: DATOS DE ESPOSO(A) (Omitido si es Soltero o Divorciado)
+    { categoria: "PERSONAL", id: "esposo_combo", pregunta: "INFORMACIÓN DE SU ESPOSO(A) / EX-ESPOSO(A):", tip: "⚠️ OBLIGATORIO: Nombre completo con apellidos, fecha y lugar de nacimiento.", tipo: "esposo_combo" },
     
     { categoria: "PERSONAL", id: "datos_hijos", pregunta: "¿TIENE HIJOS?", tip: "Si tienes, captura nombres completos y fechas de nacimiento.", tipo: "sino_texto" },
     { categoria: "PERSONAL", id: "municipio_nacimiento", pregunta: "MUNICIPIO DE NACIMIENTO:", tip: "Verifica en tu acta de nacimiento.", tipo: "text" },
@@ -80,7 +78,7 @@ const cuestionarioBase = [
 
 // --- CONSTANTES DE OMISIÓN ---
 const PREGUNTAS_A_OMITIR_PRIMERA_VEZ = ['ssn_tax_id', 'visitas_anteriores', 'licencia_eu', 'visas_anteriores', 'visa_robada', 'problemas_legales_eu'];
-const PREGUNTAS_A_OMITIR_SOLTERO = ['nombre_esposo', 'fecha_esposo', 'lugar_esposo'];
+const PREGUNTAS_A_OMITIR_SOLTERO = ['esposo_combo'];
 
 // --- CONSTANTES DE FLUJO ---
 const PASOS_PRE_CUESTIONARIO = 5; 
@@ -303,6 +301,21 @@ function renderScreen(pasoForzado = null) {
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha de Nacimiento:</label>
                     <input type="date" id="per_fecha" value="${d.fechaNacimiento}">
+                `;
+            }
+            else if (q.tipo === "esposo_combo") {
+                let d = {nombre: "", fecha: "", lugar: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre Completo con Apellidos:</label>
+                    <input type="text" id="esp_nombre" value="${d.nombre || ''}" placeholder="Ej. María Josefa López Pérez">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha de Nacimiento:</label>
+                    <input type="date" id="esp_fecha" value="${d.fecha || ''}">
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. Lugar de Nacimiento:</label>
+                    <input type="text" id="esp_lugar" value="${d.lugar || ''}" placeholder="Ej. Ciudad Valles, San Luis Potosí">
                 `;
             }
             else if (q.tipo === "padres_combo") {
@@ -648,6 +661,20 @@ function guardarRespuestaCuestionario(id, tipo) {
 
         v = JSON.stringify({nombreCompleto: nom, fechaNacimiento: fch});
     }
+    else if(tipo === "esposo_combo") {
+        let nom = document.getElementById('esp_nombre').value.trim();
+        let fch = document.getElementById('esp_fecha').value.trim();
+        let lug = document.getElementById('esp_lugar').value.trim();
+
+        if(!nom || !fch || !lug) { mostrarAlerta("Por favor completa el nombre, fecha y lugar de nacimiento de su esposo(a)."); return; }
+        if(nom.length < 3 || lug.length < 3) { mostrarAlerta("Por favor proporciona información más descriptiva."); return; }
+
+        let hoy = new Date(); hoy.setHours(0,0,0,0);
+        let fechaIngresada = new Date(fch + 'T00:00:00');
+        if (fechaIngresada >= hoy) { mostrarAlerta("La fecha de nacimiento no puede ser hoy ni futura."); return; }
+
+        v = JSON.stringify({nombre: nom, fecha: fch, lugar: lug});
+    }
     else if(tipo === "padres_combo") {
         let nom = document.getElementById('pad_nombres').value.trim();
         let ocu = document.getElementById('pad_ocupacion').value.trim();
@@ -794,18 +821,13 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(!v) { mostrarAlerta("Escribe o selecciona una respuesta para continuar."); return; }
         
         if((tipo === "text" || tipo === "textarea") && v.length < 3) {
-            mostrarAlerta("Tu respuesta es muy corta. Por favor proporciona información más detallada.");
+            mostrarAlerta("Tu respuesta es muy corta. Por favor proporciona información más detailed.");
             return;
         }
 
         if(tipo === "email") {
             let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if(!re.test(v)) { mostrarAlerta("El correo electrónico no es válido."); return; }
-        }
-        if (id === "fecha_esposo") {
-            let hoy = new Date(); hoy.setHours(0,0,0,0);
-            let fechaIngresada = new Date(v + 'T00:00:00');
-            if (fechaIngresada >= hoy) { mostrarAlerta("La fecha ingresada no puede ser hoy ni futura."); return; }
         }
     }
     
@@ -907,6 +929,8 @@ function mostrarResumen() {
                 let obj = JSON.parse(valor);
                 if(obj.nombreCompleto !== undefined && obj.fechaNacimiento !== undefined) {
                     valor = `Nombre Completo: ${obj.nombreCompleto}\nFecha de Nacimiento: ${obj.fechaNacimiento}`;
+                } else if(obj.nombre !== undefined && obj.fecha !== undefined && obj.lugar !== undefined) {
+                    valor = `Nombre Esposo(a): ${obj.nombre}\nFecha de Nacimiento: ${obj.fecha}\nLugar de Nacimiento: ${obj.lugar}`;
                 } else if(obj.nivel !== undefined) {
                     valor = `Nivel: ${obj.nivel}\nEspecialidad: ${obj.especialidad || 'N/A'}\nInstituciones:\n${obj.escuelas}`;
                 } else if(obj.nombre !== undefined && obj.direccion !== undefined) {
