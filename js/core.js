@@ -402,30 +402,78 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "contactos_combo") {
-                let d = {familiaresCercanos: "", otrosFamiliares: "", viajesAnteriores: ""};
-                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+                let d = {
+                    cercanos_sino: "", cercanos_det: "",
+                    otros_sino: "", otros_det: "",
+                    viajes_sino: "", viajes_det: ""
+                };
+
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
+                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                }
 
                 html += `
-                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. ¿Tiene Esposo(a), Padres, Hermanos o Hijos en ${paisLimpio}?:</label>
-                    <textarea id="cnt_cercanos" placeholder="Si tienes, anota nombre completo y estatus. Si no tienes pon 'No'">${d.familiaresCercanos}</textarea>
-                    
-                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Tiene algún otro familiar viviendo en ${paisLimpio}?:</label>
-                    <textarea id="cnt_otros" placeholder="Tíos, primos, etc. Si no tienes pon 'No'">${d.otrosFamiliares}</textarea>
+                    <!-- PREGUNTA 1: FAMILIARES CERCANOS -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">
+                        1. ¿Tiene Esposo(a), Padres, Hermanos o Hijos en ${paisLimpio}?:
+                    </label>
+                    <select id="cnt_cercanos_sino" onchange="document.getElementById('div_cnt_cercanos').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.cercanos_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.cercanos_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_cnt_cercanos" style="display: ${d.cercanos_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Especifica nombre completo y estatus migratorio:</label>
+                        <textarea id="cnt_cercanos_det" placeholder="Escribe los detalles aquí...">${d.cercanos_det || ''}</textarea>
+                    </div>
 
-                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. En los últimos 5 años ¿ha viajado a otro país diferente al tuyo o al destino?:</label>
-                    <textarea id="cnt_viajes" placeholder="Escribe los países visitados. Si no has salido pon 'No'">${d.viajesAnteriores}</textarea>
+                    <!-- PREGUNTA 2: OTROS FAMILIARES -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        2. ¿Tiene algún otro familiar viviendo en ${paisLimpio}?:
+                    </label>
+                    <select id="cnt_otros_sino" onchange="document.getElementById('div_cnt_otros').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.otros_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.otros_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_cnt_otros" style="display: ${d.otros_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Especifica nombres y parentesco (tíos, primos, etc.):</label>
+                        <textarea id="cnt_otros_det" placeholder="Escribe los detalles aquí...">${d.otros_det || ''}</textarea>
+                    </div>
+
+                    <!-- PREGUNTA 3: VIAJES INTERNACIONALES -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        3. En los últimos 5 años ¿ha viajado a otro país diferente al tuyo o al destino?:
+                    </label>
+                    <select id="cnt_viajes_sino" onchange="document.getElementById('div_cnt_viajes').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.viajes_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.viajes_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_cnt_viajes" style="display: ${d.viajes_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Especifica qué países visitaste y fechas aproximadas:</label>
+                        <textarea id="cnt_viajes_det" placeholder="Escribe los detalles aquí...">${d.viajes_det || ''}</textarea>
+                    </div>
                 `;
             }
             else if (q.tipo === "pasaporte_combo") {
-                let d = {lugarEmision: "", robo: ""};
+                let d = {lugarEmision: "", robo_sino: "", robo_det: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Lugar de Emisión de su Pasaporte:</label>
-                    <input type="text" id="psp_emision" value="${d.lugarEmision}" placeholder="Ej. Durango / Culiacán / CDMX">
+                    <input type="text" id="psp_emision" value="${d.lugarEmision || ''}" placeholder="Ej. Durango / Culiacán / CDMX">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Alguna vez le han robado o extraviado un pasaporte?:</label>
-                    <textarea id="psp_robo" placeholder="Si la respuesta es 'Sí', detalla el año y circunstancia. Si no pon 'No'">${d.robo}</textarea>
+                    <select id="psp_robo_sino" onchange="document.getElementById('div_psp_robo').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.robo_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.robo_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_psp_robo" style="display: ${d.robo_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Detalla el año y las circunstancias del robo o extravío:</label>
+                        <textarea id="psp_robo_det" placeholder="Escribe los detalles aquí...">${d.robo_det || ''}</textarea>
+                    </div>
                 `;
             }
             else if (q.tipo === "sino_texto") {
@@ -649,19 +697,59 @@ function guardarRespuestaCuestionario(id, tipo) {
         v = JSON.stringify({hospedaje: hsp, quienPaga: pag, acompanantes: acm});
     }
     else if(tipo === "contactos_combo") {
-        let crc = document.getElementById('cnt_cercanos').value.trim();
-        let otr = document.getElementById('cnt_otros').value.trim();
-        let vjs = document.getElementById('cnt_viajes').value.trim();
+        let crc_sino = document.getElementById('cnt_cercanos_sino').value;
+        let crc_det  = document.getElementById('cnt_cercanos_det').value.trim();
 
-        if(!crc || !otr || !vjs) { mostrarAlerta("Por favor completa las 3 preguntas de esta sección."); return; }
-        v = JSON.stringify({familiaresCercanos: crc, otrosFamiliares: otr, viajesAnteriores: vjs});
+        let otr_sino = document.getElementById('cnt_otros_sino').value;
+        let otr_det  = document.getElementById('cnt_otros_det').value.trim();
+
+        let vjs_sino = document.getElementById('cnt_viajes_sino').value;
+        let vjs_det  = document.getElementById('cnt_viajes_det').value.trim();
+
+        if(!crc_sino || !otr_sino || !vjs_sino) { 
+            mostrarAlerta("Por favor responde Sí o No a las 3 preguntas."); 
+            return; 
+        }
+
+        if(crc_sino === 'Sí' && crc_det.length < 3) {
+            mostrarAlerta("Por favor ingresa los detalles de tus familiares cercanos.");
+            return;
+        }
+        if(otr_sino === 'Sí' && otr_det.length < 3) {
+            mostrarAlerta("Por favor ingresa los detalles de tus otros familiares.");
+            return;
+        }
+        if(vjs_sino === 'Sí' && vjs_det.length < 3) {
+            mostrarAlerta("Por favor ingresa los detalles de tus viajes anteriores.");
+            return;
+        }
+
+        v = JSON.stringify({
+            cercanos_sino: crc_sino, cercanos_det: crc_sino === 'Sí' ? crc_det : 'No aplica',
+            otros_sino: otr_sino, otros_det: otr_sino === 'Sí' ? otr_det : 'No aplica',
+            viajes_sino: vjs_sino, viajes_det: vjs_sino === 'Sí' ? vjs_det : 'No aplica'
+        });
     }
     else if(tipo === "pasaporte_combo") {
         let emi = document.getElementById('psp_emision').value.trim();
-        let rbo = document.getElementById('psp_robo').value.trim();
+        let rbo_sino = document.getElementById('psp_robo_sino').value;
+        let rbo_det = document.getElementById('psp_robo_det').value.trim();
 
-        if(!emi || !rbo) { mostrarAlerta("Por favor completa los datos de emisión y estado de pasaporte."); return; }
-        v = JSON.stringify({lugarEmision: emi, robo: rbo});
+        if(!emi || !rbo_sino) { 
+            mostrarAlerta("Por favor completa el lugar de emisión y responde si te han robado o extraviado un pasaporte."); 
+            return; 
+        }
+
+        if(rbo_sino === 'Sí' && rbo_det.length < 3) {
+            mostrarAlerta("Seleccionaste 'Sí' en robo o extravío. Por favor detalla el año y circunstancia.");
+            return;
+        }
+
+        v = JSON.stringify({
+            lugarEmision: emi, 
+            robo_sino: rbo_sino, 
+            robo_det: rbo_sino === 'Sí' ? rbo_det : 'No'
+        });
     }
     else if(tipo === "sino_texto") {
         let sino = document.getElementById('respuestaDS160_sino').value;
@@ -806,8 +894,14 @@ function mostrarResumen() {
                     valor = `Motivo del Viaje: ${obj.motivo}\nFecha Aproximada: ${obj.fecha}\nTiempo de Permanencia: ${obj.tiempo}`;
                 } else if(obj.hospedaje !== undefined) {
                     valor = `Hospedaje: ${obj.hospedaje}\nQuién Paga: ${obj.quienPaga}\nAcompañantes: ${obj.acompanantes}`;
+                } else if(obj.cercanos_sino !== undefined) {
+                    valor = `Familiares Cercanos: ${obj.cercanos_sino}` + (obj.cercanos_sino === 'Sí' ? ` (${obj.cercanos_det})` : '') +
+                            `\nOtros Familiares: ${obj.otros_sino}` + (obj.otros_sino === 'Sí' ? ` (${obj.otros_det})` : '') +
+                            `\nViajes Últimos 5 Años: ${obj.viajes_sino}` + (obj.viajes_sino === 'Sí' ? ` (${obj.viajes_det})` : '');
                 } else if(obj.familiaresCercanos !== undefined) {
                     valor = `Familiares Cercanos en Destino: ${obj.familiaresCercanos}\nOtros Familiares en Destino: ${obj.otrosFamiliares}\nViajes Últimos 5 Años: ${obj.viajesAnteriores}`;
+                } else if(obj.robo_sino !== undefined) {
+                    valor = `Lugar de Emisión del Pasaporte: ${obj.lugarEmision}\nPasaporte Robado/Extraviado: ${obj.robo_sino}` + (obj.robo_sino === 'Sí' ? ` (${obj.robo_det})` : '');
                 } else if(obj.lugarEmision !== undefined) {
                     valor = `Lugar de Emisión del Pasaporte: ${obj.lugarEmision}\nHistorial de Robo/Extravío: ${obj.robo}`;
                 } else if(obj.nombres !== undefined && obj.ocupacion !== undefined) {
