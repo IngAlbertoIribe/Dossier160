@@ -15,8 +15,11 @@ const cuestionarioBase = [
 
     { categoria: "PERSONAL", id: "direccion_completa", pregunta: "DIRECCIÓN COMPLETA DE RESIDENCIA ACTUAL:", tip: "Ingresa tu Código Postal para buscar tu colonia.", tipo: "direccion_mx" },
     
-    // PASO UNIFICADO 3: TELÉFONOS Y REDES SOCIALES
-    { categoria: "PERSONAL", id: "contacto_redes_combo", pregunta: "TELÉFONOS Y REDES SOCIALES:", tip: "⚠️ IMPORTANTE: Números donde puedan localizarte y tus usuarios o enlaces exactos (Ej. facebook.com/juanperez). Los consulados verifican estas cuentas.", tipo: "contacto_redes_combo" },
+    // PASO UNIFICADO 3: TELÉFONOS, REDES SOCIALES E HISTORIAL DE CONTACTO
+    { categoria: "PERSONAL", id: "contacto_redes_combo", pregunta: "TELÉFONOS, REDES SOCIALES E HISTORIAL DE CONTACTO:", tip: "⚠️ IMPORTANTE: Números donde puedan localizarte, tus usuarios o enlaces exactos (Ej. facebook.com/juanperez) e historial de teléfonos/emails usados previamente. Los consulados verifican estas cuentas.", tipo: "contacto_redes_combo" },
+
+    // REUBICADA: PROPIEDADES (ARRAIGO PERSONAL)
+    { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
     { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero' o 'Divorciado', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
     
@@ -30,13 +33,8 @@ const cuestionarioBase = [
     // Omitidas si NO ha viajado antes
     { categoria: "PERSONAL", id: "ssn_tax_id", pregunta: "EN EL PAÍS DESTINO ¿CUENTAS CON REGISTRO, SEGURO O ID LOCAL?", tip: "Si respondes Sí, anota el número.", tipo: "sino_texto" },
 
-    { categoria: "PERSONAL", id: "historial_contacto", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HAS USADO OTROS TELÉFONOS/EMAILS?", tip: "Si respondes Sí, anótalos detalladamente.", tipo: "sino_texto" },
-    
     // --- DATOS DE PADRES (PASO UNIFICADO) ---
     { categoria: "PERSONAL", id: "padres_combo", pregunta: "INFORMACIÓN DE SUS PADRES:", tip: "⚠️ OBLIGATORIO: Nombres completos, fechas de nacimiento y ocupación de AMBOS padres (aunque hayan fallecido o estén jubilados).", tipo: "padres_combo" },
-    
-    // --- PROPIEDADES (ARRAIGO PERSONAL) ---
-    { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
     // --- SECCIÓN 2: PROFESIONAL (FORMULARIOS COMPUESTOS) ---
     { categoria: "PROFESIONAL", id: "educacion_completa", pregunta: "INFORMACIÓN ACADÉMICA:", tip: "Captura tu nivel, tu especialidad (si aplica) y tus instituciones.", tipo: "educacion_combo" },
@@ -325,15 +323,26 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "contacto_redes_combo") {
-                let d = {telefonos: "", redes: ""};
+                let d = {telefonos: "", redes: "", prev_sino: "", prev_det: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
 
                 html += `
-                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Teléfono de Casa y Celular:</label>
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Teléfono de Casa y Celular Actuales:</label>
                     <input type="text" id="cnt_telefonos" value="${d.telefonos || ''}" placeholder="Ej. Cel: 6671234567 / Casa: 6677123456">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Redes Sociales (Facebook, Instagram, etc.):</label>
                     <textarea id="cnt_redes" placeholder="Escribe tu usuario exacto o enlace (Ej. facebook.com/juanperez, instagram.com/juanperez)...">${d.redes || ''}</textarea>
+
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">3. En los últimos 5 años ¿has usado otros teléfonos o correos electrónicos?:</label>
+                    <select id="cnt_prev_sino" onchange="document.getElementById('div_cnt_prev').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.prev_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.prev_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_cnt_prev" style="display: ${d.prev_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Detalla todos los números o correos anteriores:</label>
+                        <textarea id="cnt_prev_det" placeholder="Escribe los números o correos aquí...">${d.prev_det || ''}</textarea>
+                    </div>
                 `;
             }
             else if (q.tipo === "esposo_combo") {
@@ -405,7 +414,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Puesto u Ocupación Principal:</label>
-                    <input type="text" id="pst_nombre" value="${d.puesto}" placeholder="Ej. Desarrollador Senior / Estudiante">
+                    <input type="text" id="pst_nombre" value="${d.puesto}" placeholder="Ej. Gerente / Estudiante">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Antigüedad en el puesto (en años):</label>
                     <input type="number" id="pst_antiguedad" value="${d.antiguedad}" placeholder="Ej. 5">
@@ -423,7 +432,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Motivo Principal de su Viaje:</label>
-                    <textarea id="pln_motivo" placeholder="Ej. Vacaciones, conocer casinos y teatros...">${d.motivo}</textarea>
+                    <textarea id="pln_motivo" placeholder="Ej. Vacaciones en Disney, conocer casinos y teatros...">${d.motivo}</textarea>
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Fecha Aproximada para Viajar:</label>
                     <input type="date" id="pln_fecha" value="${d.fecha}">
@@ -542,8 +551,8 @@ function renderScreen(pasoForzado = null) {
                         <option value="No" ${isNo ? 'selected' : ''}>No</option>
                     </select>
                     <div id="div_detalle" style="display: ${isSi ? 'block' : 'none'}; margin-top: 10px; text-align: left;">
-                        <label style="font-size:14px; font-weight:bold; display:block; color: var(--color-primario);">Especifique los detalles requeridos:</label>
-                        <textarea id="respuestaDS160_detalle" placeholder="Escriba todos los detalles aquí de forma clara...">${detalle}</textarea>
+                        <label style="font-size:14px; font-weight:bold; display:block; color: var(--color-primario);">Especifique los detalles requeridos (opcional):</label>
+                        <textarea id="respuestaDS160_detalle" placeholder="Escriba los detalles aquí...">${detalle}</textarea>
                     </div>
                 `;
             }
@@ -716,11 +725,23 @@ function guardarRespuestaCuestionario(id, tipo) {
     else if(tipo === "contacto_redes_combo") {
         let tel = document.getElementById('cnt_telefonos').value.trim();
         let red = document.getElementById('cnt_redes').value.trim();
+        let prev_sino = document.getElementById('cnt_prev_sino').value;
+        let prev_det = document.getElementById('cnt_prev_det').value.trim();
 
-        if(!tel || !red) { mostrarAlerta("Por favor completa tus números de teléfono y tus redes sociales."); return; }
+        if(!tel || !red || !prev_sino) { mostrarAlerta("Por favor completa tus números de teléfono, redes sociales y responde la pregunta de contactos anteriores."); return; }
         if(tel.length < 5 || red.length < 3) { mostrarAlerta("Por favor proporciona datos de contacto válidos y descriptivos."); return; }
 
-        v = JSON.stringify({telefonos: tel, redes: red});
+        if(prev_sino === 'Sí' && prev_det.length < 3) {
+            mostrarAlerta("Seleccionaste que has usado otros teléfonos o correos. Por favor detalla la información.");
+            return;
+        }
+
+        v = JSON.stringify({
+            telefonos: tel, 
+            redes: red, 
+            prev_sino: prev_sino, 
+            prev_det: prev_sino === 'Sí' ? prev_det : 'No'
+        });
     }
     else if(tipo === "esposo_combo") {
         let nom = document.getElementById('esp_nombre').value.trim();
@@ -866,13 +887,9 @@ function guardarRespuestaCuestionario(id, tipo) {
         let sino = document.getElementById('respuestaDS160_sino').value;
         if(!sino) { mostrarAlerta("Por favor, selecciona Sí o No."); return; }
         
+        let detalle = document.getElementById('respuestaDS160_detalle').value.trim();
         if(sino === "Sí") {
-            let detalle = document.getElementById('respuestaDS160_detalle').value.trim();
-            if(detalle.length < 3) { 
-                mostrarAlerta("Seleccionaste 'Sí'. Por favor especifica los detalles requeridos de forma clara."); 
-                return; 
-            }
-            v = `Sí: ${detalle}`;
+            v = `Sí${detalle ? ': ' + detalle : ''}`;
         } else {
             v = "No";
         }
@@ -993,7 +1010,7 @@ function mostrarResumen() {
                 } else if(obj.municipio !== undefined) {
                     valor = `Municipio de Nacimiento: ${obj.municipio}\nOtra Nacionalidad: ${obj.nac_sino}` + (obj.nac_sino === 'Sí' ? ` (${obj.nac_det})` : '');
                 } else if(obj.telefonos !== undefined && obj.redes !== undefined) {
-                    valor = `Teléfonos: ${obj.telefonos}\nRedes Sociales: ${obj.redes}`;
+                    valor = `Teléfonos: ${obj.telefonos}\nRedes Sociales: ${obj.redes}\nTeléfonos/Emails Anteriores: ${obj.prev_sino}` + (obj.prev_sino === 'Sí' ? ` (${obj.prev_det})` : '');
                 } else if(obj.nombre !== undefined && obj.fecha !== undefined && obj.lugar !== undefined) {
                     valor = `Nombre Esposo(a): ${obj.nombre}\nFecha de Nacimiento: ${obj.fecha}\nLugar de Nacimiento: ${obj.lugar}`;
                 } else if(obj.nivel !== undefined) {
