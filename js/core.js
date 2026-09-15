@@ -243,7 +243,7 @@ function renderScreen(pasoForzado = null) {
                 <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✍️</div>
                 <h3>¡Excelente!</h3>
                 <p>Captura el folio de tu pasaporte:</p>
-                <input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}">
+                <input type="text" id="inputFolio" value="${appData.folio_pasaporte || ''}" placeholder="Ej. G-00001" style="text-align: center;">
                 <button onclick="guardarInputGeneral('folio_pasaporte', 'inputFolio', 4)">Guardar Folio</button>
             `; 
             break;
