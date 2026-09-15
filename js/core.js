@@ -7,28 +7,29 @@ const cuestionarioBase = [
     // --- SECCIÓN 1: PERSONAL ---
     { categoria: "PERSONAL", id: "email", pregunta: "E-MAIL:", tip: "Usa un correo al que tengas acceso diario.", tipo: "email" },
     
-    // PASO UNIFICADO: NOMBRE Y FECHA DE NACIMIENTO
+    // PASO UNIFICADO 1: NOMBRE Y FECHA DE NACIMIENTO
     { categoria: "PERSONAL", id: "nombre_nacimiento_combo", pregunta: "NOMBRE COMPLETO Y FECHA DE NACIMIENTO:", tip: "Ingresa tu nombre exactamente como aparece en tu pasaporte y tu fecha de nacimiento.", tipo: "nombre_nacimiento_combo" },
     
+    // PASO UNIFICADO 2: MUNICIPIO Y OTRA NACIONALIDAD
+    { categoria: "PERSONAL", id: "lugar_nacionalidad_combo", pregunta: "LUGAR DE NACIMIENTO Y OTRA NACIONALIDAD:", tip: "Verifica tu municipio en tu acta de nacimiento e indica si posees otra nacionalidad.", tipo: "lugar_nacionalidad_combo" },
+
+    { categoria: "PERSONAL", id: "direccion_completa", pregunta: "DIRECCIÓN COMPLETA DE RESIDENCIA ACTUAL:", tip: "Ingresa tu Código Postal para buscar tu colonia.", tipo: "direccion_mx" },
+    
+    // PASO UNIFICADO 3: TELÉFONOS Y REDES SOCIALES
+    { categoria: "PERSONAL", id: "contacto_redes_combo", pregunta: "TELÉFONOS Y REDES SOCIALES:", tip: "⚠️ IMPORTANTE: Números donde puedan localizarte y tus usuarios o enlaces exactos (Ej. facebook.com/juanperez). Los consulados verifican estas cuentas.", tipo: "contacto_redes_combo" },
+
     { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero' o 'Divorciado', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
     
     // PASO UNIFICADO: DATOS DE ESPOSO(A) (Omitido si es Soltero o Divorciado)
     { categoria: "PERSONAL", id: "esposo_combo", pregunta: "INFORMACIÓN DE SU ESPOSO(A) / EX-ESPOSO(A):", tip: "⚠️ OBLIGATORIO: Nombre completo con apellidos, fecha y lugar de nacimiento.", tipo: "esposo_combo" },
     
     { categoria: "PERSONAL", id: "datos_hijos", pregunta: "¿TIENE HIJOS?", tip: "Si tienes, captura nombres completos y fechas de nacimiento.", tipo: "sino_texto" },
-    { categoria: "PERSONAL", id: "municipio_nacimiento", pregunta: "MUNICIPIO DE NACIMIENTO:", tip: "Verifica en tu acta de nacimiento.", tipo: "text" },
-    { categoria: "PERSONAL", id: "otra_nacionalidad", pregunta: "¿TIENES ALGUNA OTRA NACIONALIDAD?", tip: "Si respondes Sí, especifica cuál.", tipo: "sino_texto" },
     
     { categoria: "PERSONAL", id: "historial_previo_eu", pregunta: "¿HA VIAJADO O HA TENIDO VISA DEL PAÍS DESTINO ANTERIORMENTE?", tip: "Si eliges 'No', omitiremos preguntas sobre permisos locales, visas previas e historial de viajes a ese destino.", tipo: "select", opciones: ["Sí, he viajado o he tenido visa", "No, nunca he ido y es mi primera visa"] },
     
     // Omitidas si NO ha viajado antes
     { categoria: "PERSONAL", id: "ssn_tax_id", pregunta: "EN EL PAÍS DESTINO ¿CUENTAS CON REGISTRO, SEGURO O ID LOCAL?", tip: "Si respondes Sí, anota el número.", tipo: "sino_texto" },
 
-    { categoria: "PERSONAL", id: "direccion_completa", pregunta: "DIRECCIÓN COMPLETA DE RESIDENCIA ACTUAL:", tip: "Ingresa tu Código Postal para buscar tu colonia.", tipo: "direccion_mx" },
-    { categoria: "PERSONAL", id: "telefonos", pregunta: "TELÉFONO DE CASA Y CELULAR:", tip: "Números donde puedan localizarte actualmente.", tipo: "text" },
-    
-    // --- REDES SOCIALES ---
-    { categoria: "PERSONAL", id: "redes_sociales", pregunta: "REDES SOCIALES (FACEBOOK, INSTAGRAM, ETC):", tip: "⚠️ IMPORTANTE: Escribe tu usuario exacto o enlace (Ej. facebook.com/juanperez). Los consulados verifican estas cuentas.", tipo: "textarea" },
     { categoria: "PERSONAL", id: "historial_contacto", pregunta: "EN LOS ÚLTIMOS 5 AÑOS ¿HAS USADO OTROS TELÉFONOS/EMAILS?", tip: "Si respondes Sí, anótalos detalladamente.", tipo: "sino_texto" },
     
     // --- DATOS DE PADRES (PASO UNIFICADO) ---
@@ -303,6 +304,38 @@ function renderScreen(pasoForzado = null) {
                     <input type="date" id="per_fecha" value="${d.fechaNacimiento}">
                 `;
             }
+            else if (q.tipo === "lugar_nacionalidad_combo") {
+                let d = {municipio: "", nac_sino: "", nac_det: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Municipio de Nacimiento:</label>
+                    <input type="text" id="lug_municipio" value="${d.municipio || ''}" placeholder="Ej. Culiacán / Monterrey / Guadalajara">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. ¿Tiene alguna otra nacionalidad?:</label>
+                    <select id="lug_nac_sino" onchange="document.getElementById('div_lug_nac').style.display = this.value === 'Sí' ? 'block' : 'none'">
+                        <option value="">Selecciona una opción...</option>
+                        <option value="Sí" ${d.nac_sino === 'Sí' ? 'selected' : ''}>Sí</option>
+                        <option value="No" ${d.nac_sino === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    <div id="div_lug_nac" style="display: ${d.nac_sino === 'Sí' ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">Especifica cuál o cuáles otras nacionalidades tienes:</label>
+                        <input type="text" id="lug_nac_det" value="${d.nac_det || ''}" placeholder="Ej. Española / Estadounidense">
+                    </div>
+                `;
+            }
+            else if (q.tipo === "contacto_redes_combo") {
+                let d = {telefonos: "", redes: ""};
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+
+                html += `
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Teléfono de Casa y Celular:</label>
+                    <input type="text" id="cnt_telefonos" value="${d.telefonos || ''}" placeholder="Ej. Cel: 6671234567 / Casa: 6677123456">
+                    
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Redes Sociales (Facebook, Instagram, etc.):</label>
+                    <textarea id="cnt_redes" placeholder="Escribe tu usuario exacto o enlace (Ej. facebook.com/juanperez, instagram.com/juanperez)...">${d.redes || ''}</textarea>
+                `;
+            }
             else if (q.tipo === "esposo_combo") {
                 let d = {nombre: "", fecha: "", lugar: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
@@ -360,7 +393,7 @@ function renderScreen(pasoForzado = null) {
 
                 html += `
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">1. Nombre de la Empresa o Institución:</label>
-                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Empresa / Freelance / Ama de casa">
+                    <input type="text" id="emp_nombre" value="${d.nombre}" placeholder="Ej. Grupo Dportenis / Freelance / Ama de casa">
                     
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">2. Dirección Completa y Teléfono:</label>
                     <textarea id="emp_direccion" placeholder="Calle, número, colonia, ciudad, estado y teléfono de contacto...">${d.direccion}</textarea>
@@ -661,6 +694,34 @@ function guardarRespuestaCuestionario(id, tipo) {
 
         v = JSON.stringify({nombreCompleto: nom, fechaNacimiento: fch});
     }
+    else if(tipo === "lugar_nacionalidad_combo") {
+        let mun = document.getElementById('lug_municipio').value.trim();
+        let nac_sino = document.getElementById('lug_nac_sino').value;
+        let nac_det = document.getElementById('lug_nac_det').value.trim();
+
+        if(!mun || !nac_sino) { mostrarAlerta("Por favor ingresa tu municipio y responde si tienes otra nacionalidad."); return; }
+        if(mun.length < 2) { mostrarAlerta("Por favor especifica bien tu municipio."); return; }
+
+        if(nac_sino === 'Sí' && nac_det.length < 2) {
+            mostrarAlerta("Seleccionaste que tienes otra nacionalidad. Por favor especifica cuál es.");
+            return;
+        }
+
+        v = JSON.stringify({
+            municipio: mun,
+            nac_sino: nac_sino,
+            nac_det: nac_sino === 'Sí' ? nac_det : 'No'
+        });
+    }
+    else if(tipo === "contacto_redes_combo") {
+        let tel = document.getElementById('cnt_telefonos').value.trim();
+        let red = document.getElementById('cnt_redes').value.trim();
+
+        if(!tel || !red) { mostrarAlerta("Por favor completa tus números de teléfono y tus redes sociales."); return; }
+        if(tel.length < 5 || red.length < 3) { mostrarAlerta("Por favor proporciona datos de contacto válidos y descriptivos."); return; }
+
+        v = JSON.stringify({telefonos: tel, redes: red});
+    }
     else if(tipo === "esposo_combo") {
         let nom = document.getElementById('esp_nombre').value.trim();
         let fch = document.getElementById('esp_fecha').value.trim();
@@ -821,7 +882,7 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(!v) { mostrarAlerta("Escribe o selecciona una respuesta para continuar."); return; }
         
         if((tipo === "text" || tipo === "textarea") && v.length < 3) {
-            mostrarAlerta("Tu respuesta es muy corta. Por favor proporciona información más detailed.");
+            mostrarAlerta("Tu respuesta es muy corta. Por favor proporciona información más detallada.");
             return;
         }
 
@@ -929,6 +990,10 @@ function mostrarResumen() {
                 let obj = JSON.parse(valor);
                 if(obj.nombreCompleto !== undefined && obj.fechaNacimiento !== undefined) {
                     valor = `Nombre Completo: ${obj.nombreCompleto}\nFecha de Nacimiento: ${obj.fechaNacimiento}`;
+                } else if(obj.municipio !== undefined) {
+                    valor = `Municipio de Nacimiento: ${obj.municipio}\nOtra Nacionalidad: ${obj.nac_sino}` + (obj.nac_sino === 'Sí' ? ` (${obj.nac_det})` : '');
+                } else if(obj.telefonos !== undefined && obj.redes !== undefined) {
+                    valor = `Teléfonos: ${obj.telefonos}\nRedes Sociales: ${obj.redes}`;
                 } else if(obj.nombre !== undefined && obj.fecha !== undefined && obj.lugar !== undefined) {
                     valor = `Nombre Esposo(a): ${obj.nombre}\nFecha de Nacimiento: ${obj.fecha}\nLugar de Nacimiento: ${obj.lugar}`;
                 } else if(obj.nivel !== undefined) {
