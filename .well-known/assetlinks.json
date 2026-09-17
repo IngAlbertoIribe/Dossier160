@@ -1,13 +1,12 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.dossier160.app",
-      "sha256_cert_fingerprints": [
-        "0A:45:CA:87:A2:83:02:19:7B:1A:72:8A:31:9E:11:B7:71:69:5E:DB:5B:C3:3B:96:7D:32:3F:91:F6:6A:20:93",
-        "7B:BE:3D:5A:24:CC:23:68:4C:9B:FA:C2:40:DE:FC:13:5E:56:5F:B4:4B:C3:BD:94:9C:B1:29:5D:80:DB:11:18"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.dossier160.app",
+    "sha256_cert_fingerprints": [
+      "0A:45:CA:87:A2:83:02:19:7B:1A:72:8A:31:9E:11:B7:71:69:5E:DB:5B:C3:3B:96:7D:32:3F:91:F6:6A:20:93",
+      "7B:BE:3D:5A:24:CC:23:68:4C:9B:FA:C2:40:DE:FC:13:5E:56:5F:B4:4B:C3:BD:94:9C:B1:29:5D:80:DB:11:18",
+      "51:D8:B9:DA:33:BB:D1:39:B1:8B:4B:C1:41:A4:1E:F1:87:5C:AE:FD:E7:68:05:6A:65:38:3F:4E:80:B6:8A:3A"
+    ]
   }
-]
+}]
