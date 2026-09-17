@@ -1,10 +1,10 @@
 {
-  "id": "/",
+  "id": "/Dossier160/",
   "name": "Dossier160",
   "short_name": "Dossier160",
   "description": "Formulario inteligente para capturar tu perfil profesional y organizar tu expediente de forma segura.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/Dossier160/",
+  "scope": "/Dossier160/",
   "display": "standalone",
   "display_override": ["fullscreen", "minimal-ui"],
   "orientation": "portrait",
@@ -13,13 +13,13 @@
   "categories": ["productivity", "utilities", "business"],
   "icons": [
     {
-      "src": "/assets/icono.png",
+      "src": "/Dossier160/assets/icono.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icono.png",
+      "src": "/Dossier160/assets/icono.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -27,15 +27,9 @@
   ],
   "screenshots": [
     {
-      "src": "/assets/screenshot-mobile.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/assets/screenshot-desktop.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
+      "src": "/Dossier160/assets/feature-graphic.jpeg",
+      "sizes": "1024x500",
+      "type": "image/jpeg",
       "form_factor": "wide"
     }
   ]
