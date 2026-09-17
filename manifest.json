@@ -4,6 +4,7 @@
   "short_name": "Dossier160",
   "description": "Formulario inteligente para capturar tu perfil profesional y organizar tu expediente de forma segura.",
   "start_url": "./index.html",
+  "scope": "/Dossier160/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F4F7F9",
