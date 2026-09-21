@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo claro del contenedor -->
+  <rect width="512" height="512" rx="80" fill="#f8f9fa"/>
+  <!-- Carpeta azul marino -->
+  <path d="M80 160c0-17.7 14.3-32 32-32h110c11.3 0 21.8 6 27.6 15.8l14.8 24.2H400c17.7 0 32 14.3 32 32v180c0 17.7-14.3 32-32 32H112c-17.7 0-32-14.3-32-32V160z" fill="#192f5d"/>
+  <!-- Lupa roja -->
+  <circle cx="230" cy="280" r="75" fill="none" stroke="#ad1438" stroke-width="30"/>
+  <line x1="283" y1="333" x2="360" y2="410" stroke="#ad1438" stroke-width="32" stroke-linecap="round"/>
+  <!-- Letra D blanca -->
+  <text x="230" y="312" font-family="Arial, sans-serif" font-weight="bold" font-size="95" fill="white" text-anchor="middle">D</text>
+</svg>
