@@ -23,7 +23,7 @@
 }
 
 html {
-    font-size: 100%; /* Permite zoom de texto del sistema/navegador */
+    font-size: 100%;
     -webkit-text-size-adjust: 100%;
 }
 
@@ -87,7 +87,7 @@ body {
     flex: 1;
     padding: 20px 15px;
     width: 100%;
-    max-width: 800px; /* Tamaño móvil/tablet por defecto */
+    max-width: 800px;
     margin: 0 auto;
     transition: max-width 0.3s ease;
 }
@@ -165,7 +165,6 @@ button.whatsapp {
     color: #ffffff;
 }
 
-/* CAJAS DE INFORMACIÓN Y CONSEJOS */
 .tip-box, .agency-box, .warning-box, .interview-tips {
     background: #e3f2fd;
     border-left: 5px solid var(--color-primario);
@@ -238,7 +237,6 @@ button.whatsapp {
         flex: 1;
     }
 
-    /* Resumen del expediente en 2 columnas */
     #areaImprimir .resumen-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
