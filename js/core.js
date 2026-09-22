@@ -708,7 +708,7 @@ function renderScreen(pasoForzado = null) {
                 <div class="interview-tips">
                     <h4 style="margin-top:0; color:#01579b;">🎯 Consejos para tu Entrevista de Visa</h4>
                     <p>✅ <strong>Respuestas claras:</strong> Asegúrate de que tus datos verbales coincidan exactamente con tu cuestionario.</p>
-                    <p>❌ <strong>Evita errores:</strong> No des explicaciones innecesariamente largas que generen dudas.</p>
+                    <p>❌ <strong>Evita errores:</strong> No des explicaciones unnecessarily largas que generen dudas.</p>
                 </div>
 
                 <div class="button-group-desktop">
