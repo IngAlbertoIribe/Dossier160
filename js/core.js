@@ -21,9 +21,9 @@ const cuestionarioBase = [
     // PROPIEDADES (ARRAIGO PERSONAL)
     { categoria: "PERSONAL", id: "propiedades", pregunta: "¿TIENE PROPIEDADES A SU NOMBRE EN SU PAÍS DE ORIGEN?", tip: "Ej. 'Casa propia y 1 vehículo'. Demuestra tus lazos de arraigo con tu país.", tipo: "sino_texto" },
 
-    { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero' o 'Divorciado', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
+    { categoria: "PERSONAL", id: "estado_civil", pregunta: "ESTADO CIVIL:", tip: "Selecciona una opción. (Si eliges 'Soltero', 'Divorciado' o 'Unión Libre', omitiremos los datos de cónyuge).", tipo: "select", opciones: ["Soltero(a)", "Casado(a)", "Divorciado(a)", "Viudo(a)", "Unión Libre"] },
     
-    // PASO UNIFICADO: DATOS DE ESPOSO(A) (Omitido si es Soltero o Divorciado)
+    // PASO UNIFICADO: DATOS DE ESPOSO(A) (Omitido si es Soltero, Divorciado o Unión Libre)
     { categoria: "PERSONAL", id: "esposo_combo", pregunta: "INFORMACIÓN DE SU ESPOSO(A) / EX-ESPOSO(A):", tip: "⚠️ OBLIGATORIO: Nombre completo con apellidos, fecha y lugar de nacimiento.", tipo: "esposo_combo" },
     
     { categoria: "PERSONAL", id: "datos_hijos", pregunta: "¿TIENE HIJOS?", tip: "Si tienes, captura nombres completos y fechas de nacimiento.", tipo: "sino_texto" },
@@ -150,7 +150,10 @@ function debeOmitirse(idx) {
     let q = cuestionarioBase[idx];
     
     if (appData.respuestas_ds160['historial_previo_eu'] === 'No, nunca he ido y es mi primera visa' && PREGUNTAS_A_OMITIR_PRIMERA_VEZ.includes(q.id)) return true;
-    if ((appData.respuestas_ds160['estado_civil'] === 'Soltero(a)' || appData.respuestas_ds160['estado_civil'] === 'Divorciado(a)') && PREGUNTAS_A_OMITIR_SOLTERO.includes(q.id)) return true;
+    
+    // MODIFICADO: Ahora omite también si el estado civil es 'Unión Libre'
+    let estadoCivil = appData.respuestas_ds160['estado_civil'];
+    if ((estadoCivil === 'Soltero(a)' || estadoCivil === 'Divorciado(a)' || estadoCivil === 'Unión Libre') && PREGUNTAS_A_OMITIR_SOLTERO.includes(q.id)) return true;
     
     if (q.id === 'empleos_anteriores') {
         let datosPuesto = appData.respuestas_ds160['puesto_y_detalles'];
