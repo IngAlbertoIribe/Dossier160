@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport configurado para permitir zoom nativo del usuario -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Viewport 100% responsivo habilitado para zoom y accesibilidad -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Dossier160</title>
     
     <!-- PWA / Manifest -->
@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <link rel="icon" type="image/svg+xml" href="./dossier160.svg">
-    <link rel="stylesheet" href="./css/diseno.css">
+    <link rel="stylesheet" href="./diseno.css">
 </head>
 <body>
 
@@ -25,21 +25,21 @@
         <h3>⚠️ Aviso</h3>
         <p id="modalMessage">Mensaje de error aquí</p>
         <div id="modalActions" style="margin-top: 15px;">
-            <button onclick="cerrarModal()" style="background: var(--color-primario); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%;">Aceptar</button>
+            <button onclick="cerrarModal()">Aceptar</button>
         </div>
     </div>
 </div>
 
 <div id="app">
-    <div class="header">
-        <h2 style="margin: 0;">Dossier160</h2>
+    <header class="header">
+        <h2>Dossier160</h2>
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-    </div>
-    <div class="content" id="screenContent"></div>
+    </header>
+    <main class="content" id="screenContent"></main>
 </div>
 
-<script src="./js/core.js"></script>
+<script src="./core.js"></script>
 </body>
 </html>
