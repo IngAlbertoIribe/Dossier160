@@ -247,3 +247,39 @@ button.whatsapp {
         grid-column: 1 / -1;
     }
 }
+
+/* ==========================================
+   SELECTOR DE IDIOMA (AGREGADO)
+   ========================================== */
+.lang-switch {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    display: flex;
+    gap: 6px;
+    z-index: 101;
+}
+
+.lang-btn {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 6px;
+    width: auto;
+    margin-top: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.lang-btn.active {
+    background-color: var(--color-acento);
+    border-color: #ffffff;
+    color: #ffffff;
+}
