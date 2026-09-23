@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- Viewport 100% responsivo habilitado para zoom y accesibilidad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Dossier160</title>
+    <title data-i18n="title">Dossier160</title>
     
     <!-- PWA / Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -24,10 +24,10 @@
 
 <div id="customModal" style="display:none;">
     <div class="modal-content">
-        <h3>⚠️ Aviso</h3>
-        <p id="modalMessage">Mensaje de error aquí</p>
+        <h3 data-i18n="modal_warning">⚠️ Aviso</h3>
+        <p id="modalMessage" data-i18n="modal_default_msg">Mensaje de error aquí</p>
         <div id="modalActions" style="margin-top: 15px;">
-            <button onclick="cerrarModal()">Aceptar</button>
+            <button onclick="cerrarModal()" data-i18n="btn_accept">Aceptar</button>
         </div>
     </div>
 </div>
@@ -35,6 +35,13 @@
 <div id="app">
     <header class="header">
         <h2>Dossier160</h2>
+        
+        <!-- Selector de Idioma (Español / Inglés) -->
+        <div class="lang-switch" style="position: absolute; top: 10px; right: 15px; display: flex; gap: 5px;">
+            <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">ES</button>
+            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        </div>
+
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
