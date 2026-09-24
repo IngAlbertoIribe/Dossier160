@@ -67,7 +67,7 @@ const i18n = {
         btn_confirm_delete: "Sí, borrar",
         btn_cancel: "No, cancelar",
         msg_confirm_delete: "¿Estás seguro de borrar todos tus datos y reiniciar tu solicitud?",
-        msg_enter_required: "Por favor, ingresa el dato solicitado.",
+        msg_enter_required: "Por favor, ingresa los datos solicitados.",
         msg_cp_searching: "Buscando...",
         msg_cp_found: "Ubicación: {state} ✅",
         msg_cp_not_found: "CP no encontrado.",
@@ -152,7 +152,7 @@ const i18n = {
         btn_confirm_delete: "Yes, delete",
         btn_cancel: "No, cancel",
         msg_confirm_delete: "Are you sure you want to delete all your data and restart your application?",
-        msg_enter_required: "Please enter the requested information.",
+        msg_enter_required: "Please enter the required details.",
         msg_cp_searching: "Searching...",
         msg_cp_found: "Location: {state} ✅",
         msg_cp_not_found: "ZIP code not found.",
@@ -176,7 +176,25 @@ const i18n = {
     }
 };
 
-// Cuestionario Base Bilingüe (Orden Actualizado)
+// Función Global para renderizar dinámicamente hijos
+window.generarCamposHijos = function(num, lang) {
+    let container = document.getElementById('hij_container');
+    if(!container) return;
+    let html = "";
+    for(let i=1; i<=num; i++) {
+        html += `
+            <div style="background:#f4f6f8; padding:10px; border-radius:5px; margin-top:10px; border: 1px solid #e1e4e8;">
+                <label style="font-size:13px; font-weight:bold; display:block;">${lang==='en'?'Child':'Hijo'} ${i} - ${lang==='en'?'Full Name':'Nombre Completo'}:</label>
+                <input type="text" id="hij_nombre_${i}" placeholder="${lang==='en'?'Name':'Nombre'}" style="margin-bottom:8px;">
+                <label style="font-size:13px; font-weight:bold; display:block;">${lang==='en'?'Date of Birth':'Fecha de Nacimiento'}:</label>
+                <input type="date" id="hij_fecha_${i}">
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+};
+
+// Cuestionario Base Bilingüe
 const cuestionarioBase = [
     { 
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
@@ -249,8 +267,8 @@ const cuestionarioBase = [
         categoria: { es: "PERSONAL", en: "PERSONAL" }, 
         id: "datos_hijos", 
         pregunta: { es: "¿TIENE HIJOS?", en: "DO YOU HAVE CHILDREN?" }, 
-        tip: { es: "Si tienes, captura nombres completos y fechas de nacimiento.", en: "If yes, enter their full names and dates of birth." }, 
-        tipo: "sino_texto" 
+        tip: { es: "Selecciona cuántos hijos tienes para desplegar los campos correspondientes y llenar su información.", en: "Select how many children you have to fill out their details." }, 
+        tipo: "hijos_combo" 
     },
     { 
         categoria: { es: "PERSONAL", en: "PERSONAL" }, 
@@ -377,11 +395,10 @@ const PASOS_PRE_CUESTIONARIO = 5;
 const PASOS_POST_CUESTIONARIO = 8; 
 const TOTAL_PASOS = PASOS_PRE_CUESTIONARIO + cuestionarioBase.length + PASOS_POST_CUESTIONARIO; 
 
-// Variable local para controlar el sub-paso de la bienvenida
 let welcomeSubstep = 1;
 
 let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
-    idioma: "es", // Idioma por defecto
+    idioma: "es", 
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
     folio_pasaporte: "", 
@@ -391,7 +408,6 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     cita_entrevista: null
 };
 
-// Helper de traducciones
 function t(key, replacements = {}) {
     let lang = appData.idioma || "es";
     let text = (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : (i18n['es'][key] || key);
@@ -401,7 +417,6 @@ function t(key, replacements = {}) {
     return text;
 }
 
-// Lógica de Bienvenida Dinámica
 function avanzarSubPasoBienvenida(paso) {
     welcomeSubstep = paso;
     renderScreen(0);
@@ -577,7 +592,6 @@ function renderScreen(pasoForzado = null) {
     switch(step) {
         case 0: 
             if (welcomeSubstep === 1) {
-                // PASO 1: Selección de Idioma
                 html = `
                     <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🌐</div>
                     <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_title')}</h2>
@@ -590,7 +604,6 @@ function renderScreen(pasoForzado = null) {
                     </div>
                 `;
             } else if (welcomeSubstep === 2) {
-                // PASO 2: Aviso Gubernamental (Disclaimer) con Checkbox Obligatorio
                 html = `
                     <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">⚖️</div>
                     <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('disclaimer_gov_title')}</h2>
@@ -606,7 +619,6 @@ function renderScreen(pasoForzado = null) {
                     </div>
                 `;
             } else if (welcomeSubstep === 3) {
-                // PASO 3: Destino de Viaje
                 html = `
                     <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✈️</div>
                     <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_desc_title')}</h2>
@@ -723,11 +735,11 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Full Name(s) and Last Names:' : 'Nombre(s) y Apellidos Completos:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name(s) and Last Names:' : 'Nombre(s) y Apellidos Completos:'}</label>
                         <input type="text" id="per_nombre" value="${d.nombreCompleto}" placeholder="${lang === 'en' ? 'Exactly as in passport' : 'Exacto a tu pasaporte'}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
                         <input type="date" id="per_fecha" value="${d.fechaNacimiento}">
                     </div>
                 `;
@@ -737,18 +749,18 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'City/Municipality of Birth:' : 'Municipio de Nacimiento:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'City/Municipality of Birth:' : 'Municipio de Nacimiento:'}</label>
                         <input type="text" id="lug_municipio" value="${d.municipio || ''}" placeholder="Ej. Culiacán">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Do you hold another nationality?:' : '¿Tiene otra nacionalidad?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Do you hold another nationality?:' : '¿Tiene otra nacionalidad?:'}</label>
                         <select id="lug_nac_sino" onchange="document.getElementById('div_lug_nac').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.nac_sino === 'Sí' || d.nac_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.nac_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div id="div_lug_nac" class="full-width" style="display: ${(d.nac_sino === 'Sí' || d.nac_sino === 'Yes') ? 'block' : 'none'};">
+                    <div id="div_lug_nac" class="full-width" style="display: ${(d.nac_sino === 'Sí' || d.nac_sino === 'Yes') ? 'block' : 'none'}; margin-top: 10px;">
                         <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Specify which one(s):' : 'Especifica cuál o cuáles:'}</label>
                         <input type="text" id="lug_nac_det" value="${d.nac_det || ''}" placeholder="Ej. Española">
                     </div>
@@ -759,11 +771,11 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Current Phone Numbers:' : 'Teléfonos Actuales:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Current Phone Numbers:' : 'Teléfonos Actuales:'}</label>
                         <input type="text" id="cnt_telefonos" value="${d.telefonos || ''}" placeholder="${lang === 'en' ? 'Mobile / Home' : 'Celular / Casa'}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Other phones/emails in 5 years?:' : '¿Otros teléfonos/emails en 5 años?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Other phones/emails in 5 years?:' : '¿Otros teléfonos/emails en 5 años?:'}</label>
                         <select id="cnt_prev_sino" onchange="document.getElementById('div_cnt_prev').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.prev_sino === 'Sí' || d.prev_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
@@ -771,10 +783,10 @@ function renderScreen(pasoForzado = null) {
                         </select>
                     </div>
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Social Media (Facebook, Instagram, etc.):' : 'Redes Sociales (Facebook, Instagram, etc.):'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Social Media (Facebook, Instagram, etc.):' : 'Redes Sociales (Facebook, Instagram, etc.):'}</label>
                         <textarea id="cnt_redes" placeholder="${lang === 'en' ? 'Usernames or exact links...' : 'Usuarios o enlaces exactos...'}">${d.redes || ''}</textarea>
                     </div>
-                    <div id="div_cnt_prev" class="full-width" style="display: ${(d.prev_sino === 'Sí' || d.prev_sino === 'Yes') ? 'block' : 'none'};">
+                    <div id="div_cnt_prev" class="full-width" style="display: ${(d.prev_sino === 'Sí' || d.prev_sino === 'Yes') ? 'block' : 'none'}; margin-top: 10px;">
                         <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Detail previous phones/emails:' : 'Detalla números o correos anteriores:'}</label>
                         <textarea id="cnt_prev_det" placeholder="...">${d.prev_det || ''}</textarea>
                     </div>
@@ -785,30 +797,100 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
                         <input type="text" id="esp_nombre" value="${d.nombre || ''}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
                         <input type="date" id="esp_fecha" value="${d.fecha || ''}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Place of Birth:' : 'Lugar de Nacimiento:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Place of Birth:' : 'Lugar de Nacimiento:'}</label>
                         <input type="text" id="esp_lugar" value="${d.lugar || ''}">
                     </div>
                 `;
             }
-            else if (q.tipo === "padres_combo") {
-                let d = {nombres: "", ocupacion: ""};
-                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+            else if (q.tipo === "hijos_combo") {
+                let d = { num: 0, lista: [] };
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
+                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                }
+                
                 html += `
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Names and Dates of Birth of Father and Mother:' : 'Nombres y Fechas de Nacimiento de Padre y Madre:'}</label>
-                        <textarea id="pad_nombres" placeholder="Ej. Juan Pérez (01/Ene/1960)...">${d.nombres}</textarea>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Number of Children:' : 'Número de Hijos que tienes:'}</label>
+                        <select id="hij_num" onchange="generarCamposHijos(this.value, '${lang}')" style="margin-bottom: 5px;">
+                            ${[0,1,2,3,4,5,6,7,8,9].map(n => `<option value="${n}" ${d.num == n ? 'selected' : ''}>${n}</option>`).join('')}
+                        </select>
                     </div>
-                    <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? "Parents' Occupations:" : '¿A qué se dedican sus padres?:'}</label>
-                        <textarea id="pad_ocupacion" placeholder="...">${d.ocupacion}</textarea>
+                    <div id="hij_container" class="full-width">
+                `;
+                for(let i=1; i<=d.num; i++) {
+                    let nVal = d.lista[i-1] ? d.lista[i-1].nombre : '';
+                    let fVal = d.lista[i-1] ? d.lista[i-1].fecha : '';
+                    html += `
+                        <div style="background:#f4f6f8; padding:10px; border-radius:5px; margin-top:10px; border: 1px solid #e1e4e8;">
+                            <label style="font-size:13px; font-weight:bold; display:block;">${lang==='en'?'Child':'Hijo'} ${i} - ${lang==='en'?'Full Name':'Nombre Completo'}:</label>
+                            <input type="text" id="hij_nombre_${i}" value="${nVal}" placeholder="${lang==='en'?'Name':'Nombre'}" style="margin-bottom:8px;">
+                            <label style="font-size:13px; font-weight:bold; display:block;">${lang==='en'?'Date of Birth':'Fecha de Nacimiento'}:</label>
+                            <input type="date" id="hij_fecha_${i}" value="${fVal}">
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            else if (q.tipo === "padres_combo") {
+                let d = {
+                    padre_nombre: "", padre_fecha: "", padre_ocupacion: "",
+                    madre_nombre: "", madre_fecha: "", madre_ocupacion: ""
+                };
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
+                    try { 
+                        let parsed = JSON.parse(respuestaPrevia); 
+                        if(parsed.nombres) {
+                            d.padre_nombre = parsed.nombres;
+                            d.padre_ocupacion = parsed.ocupacion;
+                        } else {
+                            d = parsed;
+                        }
+                    } catch(e){} 
+                }
+                
+                html += `
+                    <div class="full-width" style="background: #f4f6f8; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e1e4e8;">
+                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "FATHER'S INFORMATION" : 'DATOS DEL PADRE'}</h4>
+                        
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
+                        <input type="text" id="padre_nombre" value="${d.padre_nombre || ''}" style="margin-bottom: 15px;" placeholder="${lang === 'en' ? 'First and Last Names' : 'Nombre(s) y Apellidos'}">
+                        
+                        <div style="display:flex; gap:10px; margin-bottom: 5px;">
+                            <div style="flex:1;">
+                                <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
+                                <input type="date" id="padre_fecha" value="${d.padre_fecha || ''}">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Occupation:' : 'Ocupación:'}</label>
+                                <input type="text" id="padre_ocupacion" value="${d.padre_ocupacion || ''}" placeholder="${lang === 'en' ? 'e.g. Teacher, Retired...' : 'Ej. Comerciante, Jubilado...'}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="full-width" style="background: #f4f6f8; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e1e4e8;">
+                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "MOTHER'S INFORMATION" : 'DATOS DE LA MADRE'}</h4>
+                        
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
+                        <input type="text" id="madre_nombre" value="${d.madre_nombre || ''}" style="margin-bottom: 15px;" placeholder="${lang === 'en' ? 'First and Last Names' : 'Nombre(s) y Apellidos'}">
+                        
+                        <div style="display:flex; gap:10px; margin-bottom: 5px;">
+                            <div style="flex:1;">
+                                <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Date of Birth:' : 'Fecha de Nacimiento:'}</label>
+                                <input type="date" id="madre_fecha" value="${d.madre_fecha || ''}">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Occupation:' : 'Ocupación:'}</label>
+                                <input type="text" id="madre_ocupacion" value="${d.madre_ocupacion || ''}" placeholder="${lang === 'en' ? 'e.g. Teacher, Retired...' : 'Ej. Comerciante, Jubilado...'}">
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -821,7 +903,7 @@ function renderScreen(pasoForzado = null) {
                 let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Technical / Vocational", "Bachelor's / Engineering", "Master's", "Doctorate"].includes(datosEdu.nivel);
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Education Level:' : 'Nivel de Estudios:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Education Level:' : 'Nivel de Estudios:'}</label>
                         <select id="edu_nivel" onchange="
                             let req = ['Carrera Técnica', 'Licenciatura / Ingeniería', 'Maestría', 'Doctorado', 'Technical / Vocational', 'Bachelor\\'s / Engineering', 'Master\\'s', 'Doctorate'].includes(this.value);
                             document.getElementById('div_especialidad').style.display = req ? 'block' : 'none';
@@ -830,12 +912,12 @@ function renderScreen(pasoForzado = null) {
                             ${niveles.map(o => `<option value="${o}" ${datosEdu.nivel === o ? 'selected':''}>${o}</option>`).join('')}
                         </select>
                     </div>
-                    <div id="div_especialidad" style="display: ${requiereEspecialidad ? 'block' : 'none'};">
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Major / Specialty:' : 'Especialidad / Carrera:'}</label>
+                    <div id="div_especialidad" style="display: ${requiereEspecialidad ? 'block' : 'none'}; margin-top: 10px;">
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Major / Specialty:' : 'Especialidad / Carrera:'}</label>
                         <input type="text" id="edu_especialidad" value="${datosEdu.especialidad && !['No aplica', 'N/A'].includes(datosEdu.especialidad) ? datosEdu.especialidad : ''}">
                     </div>
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Institutions attended:' : 'Instituciones asistidas:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Institutions attended:' : 'Instituciones asistidas:'}</label>
                         <textarea id="edu_escuelas" placeholder="${lang === 'en' ? 'School, address, and dates...' : 'Escuela, domicilio y fechas...'}">${datosEdu.escuelas}</textarea>
                     </div>
                 `;
@@ -845,11 +927,11 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Company or Institution Name:' : 'Nombre de la Empresa o Institución:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Company or Institution Name:' : 'Nombre de la Empresa o Institución:'}</label>
                         <input type="text" id="emp_nombre" value="${d.nombre}">
                     </div>
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Full Address and Phone:' : 'Dirección Completa y Teléfono:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Full Address and Phone:' : 'Dirección Completa y Teléfono:'}</label>
                         <textarea id="emp_direccion">${d.direccion}</textarea>
                     </div>
                 `;
@@ -859,19 +941,19 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Job Title / Occupation:' : 'Puesto u Ocupación Principal:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Job Title / Occupation:' : 'Puesto u Ocupación Principal:'}</label>
                         <input type="text" id="pst_nombre" value="${d.puesto}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Years Employed:' : 'Antigüedad (años):'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Years Employed:' : 'Antigüedad (años):'}</label>
                         <input type="number" id="pst_antiguedad" value="${d.antiguedad}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Gross Monthly Income:' : 'Sueldo Mensual Bruto:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Gross Monthly Income:' : 'Sueldo Mensual Bruto:'}</label>
                         <input type="text" id="pst_sueldo" value="${d.sueldo}">
                     </div>
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">4. ${lang === 'en' ? 'Job Duties Description:' : 'Descripción de Funciones:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">4. ${lang === 'en' ? 'Job Duties Description:' : 'Descripción de Funciones:'}</label>
                         <textarea id="pst_funciones">${d.funciones}</textarea>
                     </div>
                 `;
@@ -881,81 +963,141 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Primary Purpose of Trip:' : 'Motivo Principal de Viaje:'}</label>
-                        <textarea id="pln_motivo" placeholder="${lang === 'en' ? 'Tourism, business, medical...' : 'Turismo, negocios, estudios...'}">${d.motivo}</textarea>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Primary Purpose of Trip:' : 'Motivo Principal de Viaje:'}</label>
+                        <textarea id="pln_motivo">${d.motivo}</textarea>
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Estimated Arrival Date:' : 'Fecha Aproximada:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Estimated Arrival Date:' : 'Fecha Aproximada:'}</label>
                         <input type="date" id="pln_fecha" value="${d.fecha}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Duration of Stay (days/weeks):' : 'Permanencia (días/semanas):'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Duration of Stay (days/weeks):' : 'Permanencia (días/semanas):'}</label>
                         <input type="text" id="pln_tiempo" value="${d.tiempo}">
                     </div>
                 `;
             }
             else if (q.tipo === "logistica_combo") {
-                let d = {hospedaje: "", quienPaga: "", acompanantes_sino: "", acompanantes_det: ""};
+                let d = { hospedaje: "", quienPaga: "", acompanantes_sino: "", acompanantes_lista: [], acompanantes_otros: "" };
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
-                html += `
-                    <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Person/Entity Paying for Trip:' : 'Quién Cubre Gastos:'}</label>
-                        <input type="text" id="log_quienPaga" value="${d.quienPaga}">
+
+                // Extraer datos del cónyuge
+                let esposoData = appData.respuestas_ds160['esposo_combo'];
+                let esposoObj = null;
+                if (esposoData && esposoData !== "No aplica" && esposoData.startsWith("{")) {
+                    try { esposoObj = JSON.parse(esposoData); } catch(e){}
+                }
+
+                // Extraer datos de los hijos
+                let hijosData = appData.respuestas_ds160['datos_hijos'];
+                let hijosObj = null;
+                if (hijosData && hijosData !== "No aplica" && hijosData.startsWith("{")) {
+                    try { hijosObj = JSON.parse(hijosData); } catch(e){}
+                }
+
+                let checkboxesHtml = "";
+                if (esposoObj && esposoObj.nombre) {
+                    let checked = d.acompanantes_lista.includes(`Esposo(a): ${esposoObj.nombre}`) ? "checked" : "";
+                    checkboxesHtml += `<label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" class="chk_acompanante" value="Esposo(a): ${esposoObj.nombre}" ${checked}> ${lang==='en'?'Spouse':'Esposo(a)'}: ${esposoObj.nombre}</label>`;
+                }
+                if (hijosObj && hijosObj.num > 0) {
+                    hijosObj.lista.forEach((h, i) => {
+                        let checked = d.acompanantes_lista.includes(`Hijo(a): ${h.nombre}`) ? "checked" : "";
+                        checkboxesHtml += `<label style="display:block; margin-bottom:8px; cursor:pointer;"><input type="checkbox" class="chk_acompanante" value="Hijo(a): ${h.nombre}" ${checked}> ${lang==='en'?'Child':'Hijo(a)'}: ${h.nombre}</label>`;
+                    });
+                }
+
+                let otroChecked = d.acompanantes_otros ? "checked" : "";
+                let otroDisplay = d.acompanantes_otros ? "block" : "none";
+
+                checkboxesHtml += `
+                    <label style="display:block; margin-bottom:5px; cursor:pointer;">
+                        <input type="checkbox" id="chk_otro_acompanante" value="Otros" onchange="document.getElementById('div_otro_acompanante').style.display = this.checked ? 'block' : 'none'" ${otroChecked}>
+                        ${lang === 'en' ? 'Other(s) (Friends, other relatives...)' : 'Otro(s) (Amigos, otros familiares...)'}
+                    </label>
+                    <div id="div_otro_acompanante" style="display:${otroDisplay}; margin-top:5px; margin-left:20px;">
+                        <textarea id="log_acompanantes_det" placeholder="${lang === 'en' ? 'Specify names and relationship...' : 'Especifica nombres y parentesco...'}">${d.acompanantes_otros}</textarea>
                     </div>
-                    <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Traveling with others?:' : '¿Viaja Acompañado?:'}</label>
+                `;
+
+                if (!checkboxesHtml.includes('chk_acompanante') && !checkboxesHtml.includes('Other(s)')) {
+                     checkboxesHtml = `<p style="font-size:13px; color:#666;">No hay familiares registrados previamente. Selecciona "Otros" para agregar acompañantes.</p>` + checkboxesHtml;
+                }
+
+                html += `
+                    <div class="full-width">
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Person/Entity Paying for Trip:' : 'Quién Cubre Gastos del Viaje:'}</label>
+                        <input type="text" id="log_quienPaga" value="${d.quienPaga}" style="margin-bottom: 15px;" placeholder="${lang==='en'?'e.g. Myself, My company...':'Ej. Yo mismo, Mi empresa...'}">
+                    </div>
+                    <div class="full-width">
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Destination Accommodation:' : 'Hospedaje en Destino:'}</label>
+                        <textarea id="log_hospedaje" style="margin-bottom: 15px;" placeholder="${lang==='en'?'Hotel name or friend\\'s address...':'Nombre del hotel o dirección...'}">${d.hospedaje}</textarea>
+                    </div>
+                    <div class="full-width">
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Are you traveling with anyone?:' : '¿Viaja Acompañado?:'}</label>
                         <select id="log_acompanantes_sino" onchange="document.getElementById('div_log_acompanantes').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.acompanantes_sino === 'Sí' || d.acompanantes_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.acompanantes_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Destination Accommodation:' : 'Hospedaje en Destino:'}</label>
-                        <textarea id="log_hospedaje">${d.hospedaje}</textarea>
-                    </div>
-                    <div id="div_log_acompanantes" class="full-width" style="display: ${(d.acompanantes_sino === 'Sí' || d.acompanantes_sino === 'Yes') ? 'block' : 'none'};">
-                        <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Names and relationship of companions:' : 'Nombres y parentesco de acompañantes:'}</label>
-                        <textarea id="log_acompanantes_det">${d.acompanantes_det || ''}</textarea>
+                    <div id="div_log_acompanantes" class="full-width" style="display: ${(d.acompanantes_sino === 'Sí' || d.acompanantes_sino === 'Yes') ? 'block' : 'none'}; margin-top: 15px; background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+                        <label style="font-size:13px; color: var(--color-primario); font-weight:bold; margin-bottom:10px; display:block;">${lang === 'en' ? 'Select who is traveling with you:' : 'Selecciona quién viaja contigo:'}</label>
+                        ${checkboxesHtml}
                     </div>
                 `;
             }
             else if (q.tipo === "contactos_combo") {
-                let d = {cercanos_sino: "", cercanos_det: "", otros_sino: "", otros_det: "", viajes_sino: "", viajes_det: ""};
-                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+                let d = {
+                    cercanos_sino: "", cercanos_det: "",
+                    otros_sino: "", otros_det: "",
+                    viajes_sino: "", viajes_det: ""
+                };
+
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
+                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                }
+
                 html += `
-                    <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? `Immediate Relatives in ${paisLimpio}?:` : `¿Familiares Cercanos en ${paisLimpio}?:`}</label>
-                        <select id="cnt_cercanos_sino" onchange="document.getElementById('div_cnt_cercanos').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
-                            <option value="">${t('select_default')}</option>
-                            <option value="${t('opt_yes')}" ${d.cercanos_sino === 'Sí' || d.cercanos_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
-                            <option value="${t('opt_no')}" ${d.cercanos_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
-                        </select>
+                    <!-- PREGUNTA 1: FAMILIARES CERCANOS -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">
+                        1. ¿Tiene Esposo(a), Padres, Hermanos o Hijos en ${paisLimpio}?:
+                    </label>
+                    <select id="cnt_cercanos_sino" onchange="document.getElementById('div_cnt_cercanos').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
+                        <option value="">${t('select_default')}</option>
+                        <option value="${t('opt_yes')}" ${d.cercanos_sino === 'Sí' || d.cercanos_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
+                        <option value="${t('opt_no')}" ${d.cercanos_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
+                    </select>
+                    <div id="div_cnt_cercanos" style="display: ${(d.cercanos_sino === 'Sí' || d.cercanos_sino === 'Yes') ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Specify names and immigration status:' : 'Especifica nombre completo y estatus migratorio:'}</label>
+                        <textarea id="cnt_cercanos_det" placeholder="...">${d.cercanos_det || ''}</textarea>
                     </div>
-                    <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? `Other Relatives in ${paisLimpio}?:` : `¿Otros Familiares en ${paisLimpio}?:`}</label>
-                        <select id="cnt_otros_sino" onchange="document.getElementById('div_cnt_otros').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
-                            <option value="">${t('select_default')}</option>
-                            <option value="${t('opt_yes')}" ${d.otros_sino === 'Sí' || d.otros_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
-                            <option value="${t('opt_no')}" ${d.otros_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
-                        </select>
+
+                    <!-- PREGUNTA 2: OTROS FAMILIARES -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        2. ¿Tiene algún otro familiar viviendo en ${paisLimpio}?:
+                    </label>
+                    <select id="cnt_otros_sino" onchange="document.getElementById('div_cnt_otros').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
+                        <option value="">${t('select_default')}</option>
+                        <option value="${t('opt_yes')}" ${d.otros_sino === 'Sí' || d.otros_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
+                        <option value="${t('opt_no')}" ${d.otros_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
+                    </select>
+                    <div id="div_cnt_otros" style="display: ${(d.otros_sino === 'Sí' || d.otros_sino === 'Yes') ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Specify names and relationship:' : 'Especifica nombres y parentesco (tíos, primos, etc.):'}</label>
+                        <textarea id="cnt_otros_det" placeholder="...">${d.otros_det || ''}</textarea>
                     </div>
-                    <div id="div_cnt_cercanos" class="full-width" style="display: ${(d.cercanos_sino === 'Sí' || d.cercanos_sino === 'Yes') ? 'block' : 'none'};">
-                        <textarea id="cnt_cercanos_det" placeholder="${lang === 'en' ? 'Details of immediate relatives...' : 'Detalles de familiares cercanos...'}">${d.cercanos_det || ''}</textarea>
-                    </div>
-                    <div id="div_cnt_otros" class="full-width" style="display: ${(d.otros_sino === 'Sí' || d.otros_sino === 'Yes') ? 'block' : 'none'};">
-                        <textarea id="cnt_otros_det" placeholder="${lang === 'en' ? 'Details of other relatives...' : 'Detalles de otros familiares...'}">${d.otros_det || ''}</textarea>
-                    </div>
-                    <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Travel to other countries in last 5 years?:' : '¿Viajes a otros países en 5 años?:'}</label>
-                        <select id="cnt_viajes_sino" onchange="document.getElementById('div_cnt_viajes').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
-                            <option value="">${t('select_default')}</option>
-                            <option value="${t('opt_yes')}" ${d.viajes_sino === 'Sí' || d.viajes_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
-                            <option value="${t('opt_no')}" ${d.viajes_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
-                        </select>
-                    </div>
-                    <div id="div_cnt_viajes" class="full-width" style="display: ${(d.viajes_sino === 'Sí' || d.viajes_sino === 'Yes') ? 'block' : 'none'};">
-                        <textarea id="cnt_viajes_det" placeholder="${lang === 'en' ? 'Countries and dates...' : 'Países y fechas...'}">${d.viajes_det || ''}</textarea>
+
+                    <!-- PREGUNTA 3: VIAJES INTERNACIONALES -->
+                    <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
+                        3. En los últimos 5 años ¿ha viajado a otro país diferente al tuyo o al destino?:
+                    </label>
+                    <select id="cnt_viajes_sino" onchange="document.getElementById('div_cnt_viajes').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
+                        <option value="">${t('select_default')}</option>
+                        <option value="${t('opt_yes')}" ${d.viajes_sino === 'Sí' || d.viajes_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
+                        <option value="${t('opt_no')}" ${d.viajes_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
+                    </select>
+                    <div id="div_cnt_viajes" style="display: ${(d.viajes_sino === 'Sí' || d.viajes_sino === 'Yes') ? 'block' : 'none'}; margin-top: 8px;">
+                        <label style="font-size:13px; color: var(--color-primario);">${lang === 'en' ? 'Specify countries and approximate dates:' : 'Especifica qué países visitaste y fechas aproximadas:'}</label>
+                        <textarea id="cnt_viajes_det" placeholder="...">${d.viajes_det || ''}</textarea>
                     </div>
                 `;
             }
@@ -964,18 +1106,18 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Place of Issuance:' : 'Lugar de Emisión:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Place of Issuance:' : 'Lugar de Emisión:'}</label>
                         <input type="text" id="psp_emision" value="${d.lugarEmision || ''}">
                     </div>
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Passport lost/stolen?:' : '¿Pasaporte extraviado/robado?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Passport lost/stolen?:' : '¿Pasaporte extraviado/robado?:'}</label>
                         <select id="psp_robo_sino" onchange="document.getElementById('div_psp_robo').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.robo_sino === 'Sí' || d.robo_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.robo_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div id="div_psp_robo" class="full-width" style="display: ${(d.robo_sino === 'Sí' || d.robo_sino === 'Yes') ? 'block' : 'none'};">
+                    <div id="div_psp_robo" class="full-width" style="display: ${(d.robo_sino === 'Sí' || d.robo_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
                         <textarea id="psp_robo_det" placeholder="${lang === 'en' ? 'Loss/theft details...' : 'Detalles de robo o extravío...'}">${d.robo_det || ''}</textarea>
                     </div>
                 `;
@@ -985,36 +1127,38 @@ function renderScreen(pasoForzado = null) {
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
                 html += `
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Previously issued visa?:' : '¿Visa otorgada previamente?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Previously issued visa?:' : '¿Visa otorgada previamente?:'}</label>
                         <select id="vis_otorgada_sino" onchange="document.getElementById('div_vis_otorgada').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.otorgada_sino === 'Sí' || d.otorgada_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.otorgada_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
+                    <div id="div_vis_otorgada" class="full-width" style="display: ${(d.otorgada_sino === 'Sí' || d.otorgada_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
+                        <textarea id="vis_otorgada_det" placeholder="${lang === 'en' ? 'Issued visa details...' : 'Detalles de la visa otorgada...'}">${d.otorgada_det || ''}</textarea>
+                    </div>
+
                     <div>
-                        <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Visa stolen/canceled?:' : '¿Visa robada/revocada?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Visa stolen/canceled?:' : '¿Visa robada/revocada?:'}</label>
                         <select id="vis_perdidarobada_sino" onchange="document.getElementById('div_vis_perdidarobada').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.perdidarobada_sino === 'Sí' || d.perdidarobada_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.perdidarobada_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div id="div_vis_otorgada" class="full-width" style="display: ${(d.otorgada_sino === 'Sí' || d.otorgada_sino === 'Yes') ? 'block' : 'none'};">
-                        <textarea id="vis_otorgada_det" placeholder="${lang === 'en' ? 'Issued visa details...' : 'Detalles de la visa otorgada...'}">${d.otorgada_det || ''}</textarea>
-                    </div>
-                    <div id="div_vis_perdidarobada" class="full-width" style="display: ${(d.perdidarobada_sino === 'Sí' || d.perdidarobada_sino === 'Yes') ? 'block' : 'none'};">
+                    <div id="div_vis_perdidarobada" class="full-width" style="display: ${(d.perdidarobada_sino === 'Sí' || d.perdidarobada_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
                         <textarea id="vis_perdidarobada_det" placeholder="${lang === 'en' ? 'Circumstances and year...' : 'Circunstancias y año...'}">${d.perdidarobada_det || ''}</textarea>
                     </div>
+
                     <div class="full-width">
-                        <label style="font-size:14px; font-weight:bold;">3. ${lang === 'en' ? 'Refused entry or visa issues?:' : '¿Inconveniente de entrada o trámite?:'}</label>
+                        <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Refused entry or visa issues?:' : '¿Inconveniente de entrada o trámite?:'}</label>
                         <select id="vis_problemas_sino" onchange="document.getElementById('div_vis_problemas').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
                             <option value="">${t('select_default')}</option>
                             <option value="${t('opt_yes')}" ${d.problemas_sino === 'Sí' || d.problemas_sino === 'Yes' ? 'selected' : ''}>${t('opt_yes')}</option>
                             <option value="${t('opt_no')}" ${d.problemas_sino === 'No' ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div id="div_vis_problemas" class="full-width" style="display: ${(d.problemas_sino === 'Sí' || d.problemas_sino === 'Yes') ? 'block' : 'none'};">
+                    <div id="div_vis_problemas" class="full-width" style="display: ${(d.problemas_sino === 'Sí' || d.problemas_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
                         <textarea id="vis_problemas_det" placeholder="${lang === 'en' ? 'Explain situation...' : 'Explique la situación...'}">${d.problemas_det || ''}</textarea>
                     </div>
                 `;
@@ -1031,7 +1175,7 @@ function renderScreen(pasoForzado = null) {
                             <option value="${t('opt_no')}" ${isNo ? 'selected' : ''}>${t('opt_no')}</option>
                         </select>
                     </div>
-                    <div id="div_detalle" class="full-width" style="display: ${isSi ? 'block' : 'none'};">
+                    <div id="div_detalle" class="full-width" style="display: ${isSi ? 'block' : 'none'}; margin-top: 10px;">
                         <textarea id="respuestaDS160_detalle" placeholder="${lang === 'en' ? 'Required details...' : 'Detalles requeridos...'}">${detalle}</textarea>
                     </div>
                 `;
@@ -1046,7 +1190,7 @@ function renderScreen(pasoForzado = null) {
             }
 
             html += `
-                    <div class="tip-box full-width"><strong>${t('tip_label')}</strong><br>${tipTexto}</div>
+                    <div class="tip-box full-width" style="margin-top: 20px;"><strong>${t('tip_label')}</strong><br>${tipTexto}</div>
                     <div class="button-group-desktop">
                         <button onclick="guardarRespuestaCuestionario('${q.id}', '${q.tipo}')">${t('btn_save_next')}</button>
                         ${idx > 0 ? `<button onclick="retrocederPreguntaDS()" class="secondary">${t('btn_back')}</button>` : ''}
@@ -1224,11 +1368,36 @@ function guardarRespuestaCuestionario(id, tipo) {
         if(!nom || !fch || !lug) { mostrarAlerta(t('msg_enter_required')); return; }
         v = JSON.stringify({nombre: nom, fecha: fch, lugar: lug});
     }
+    else if(tipo === "hijos_combo") {
+        let num = parseInt(document.getElementById('hij_num').value);
+        let lista = [];
+        for(let i=1; i<=num; i++) {
+            let n = document.getElementById(`hij_nombre_${i}`).value.trim();
+            let f = document.getElementById(`hij_fecha_${i}`).value.trim();
+            if(!n || !f) {
+                mostrarAlerta(t('msg_enter_required') + ` (Hijo ${i})`);
+                return;
+            }
+            lista.push({ nombre: n, fecha: f });
+        }
+        v = JSON.stringify({ num: num, lista: lista });
+    }
     else if(tipo === "padres_combo") {
-        let nom = document.getElementById('pad_nombres').value.trim();
-        let ocu = document.getElementById('pad_ocupacion').value.trim();
-        if(!nom || !ocu) { mostrarAlerta(t('msg_enter_required')); return; }
-        v = JSON.stringify({nombres: nom, ocupacion: ocu});
+        let p_nom = document.getElementById('padre_nombre').value.trim();
+        let p_fch = document.getElementById('padre_fecha').value.trim();
+        let p_ocu = document.getElementById('padre_ocupacion').value.trim();
+        let m_nom = document.getElementById('madre_nombre').value.trim();
+        let m_fch = document.getElementById('madre_fecha').value.trim();
+        let m_ocu = document.getElementById('madre_ocupacion').value.trim();
+
+        if(!p_nom || !p_fch || !p_ocu || !m_nom || !m_fch || !m_ocu) { 
+            mostrarAlerta(t('msg_enter_required')); 
+            return; 
+        }
+        v = JSON.stringify({
+            padre_nombre: p_nom, padre_fecha: p_fch, padre_ocupacion: p_ocu,
+            madre_nombre: m_nom, madre_fecha: m_fch, madre_ocupacion: m_ocu
+        });
     }
     else if(tipo === "educacion_combo") {
         let n = document.getElementById('edu_nivel').value;
@@ -1263,9 +1432,41 @@ function guardarRespuestaCuestionario(id, tipo) {
         let hsp = document.getElementById('log_hospedaje').value.trim();
         let pag = document.getElementById('log_quienPaga').value.trim();
         let acm_sino = document.getElementById('log_acompanantes_sino').value;
-        let acm_det = document.getElementById('log_acompanantes_det').value.trim();
-        if(!hsp || !pag || !acm_sino) { mostrarAlerta(t('msg_enter_required')); return; }
-        v = JSON.stringify({hospedaje: hsp, quienPaga: pag, acompanantes_sino: acm_sino, acompanantes_det: (acm_sino === 'Sí' || acm_sino === 'Yes') ? acm_det : 'No'});
+        
+        if(!hsp || !pag || !acm_sino) { 
+            mostrarAlerta(t('msg_enter_required')); 
+            return; 
+        }
+
+        let lista = [];
+        let otros = "";
+
+        if (acm_sino === 'Sí' || acm_sino === 'Yes') {
+            let chks = document.querySelectorAll('.chk_acompanante');
+            chks.forEach(c => { if(c.checked) lista.push(c.value); });
+            
+            let chkOtro = document.getElementById('chk_otro_acompanante');
+            if(chkOtro && chkOtro.checked) {
+                otros = document.getElementById('log_acompanantes_det').value.trim();
+                if(!otros) {
+                    mostrarAlerta(lang === 'en' ? "Please specify the other companions." : "Por favor especifica los otros acompañantes.");
+                    return;
+                }
+            }
+
+            if(lista.length === 0 && !otros) {
+                mostrarAlerta(lang === 'en' ? "Please select at least one companion." : "Por favor selecciona al menos un acompañante en las casillas.");
+                return;
+            }
+        }
+
+        v = JSON.stringify({
+            hospedaje: hsp, 
+            quienPaga: pag, 
+            acompanantes_sino: acm_sino, 
+            acompanantes_lista: lista,
+            acompanantes_otros: otros
+        });
     }
     else if(tipo === "contactos_combo") {
         let crc_sino = document.getElementById('cnt_cercanos_sino').value;
@@ -1274,7 +1475,9 @@ function guardarRespuestaCuestionario(id, tipo) {
         let otr_det  = document.getElementById('cnt_otros_det').value.trim();
         let vjs_sino = document.getElementById('cnt_viajes_sino').value;
         let vjs_det  = document.getElementById('cnt_viajes_det').value.trim();
+        
         if(!crc_sino || !otr_sino || !vjs_sino) { mostrarAlerta(t('msg_enter_required')); return; }
+        
         v = JSON.stringify({
             cercanos_sino: crc_sino, cercanos_det: (crc_sino === 'Sí' || crc_sino === 'Yes') ? crc_det : 'N/A',
             otros_sino: otr_sino, otros_det: (otr_sino === 'Sí' || otr_sino === 'Yes') ? otr_det : 'N/A',
@@ -1405,13 +1608,37 @@ function mostrarResumen() {
             try {
                 let obj = JSON.parse(valor);
                 if(obj.nombreCompleto) valor = `Nombre: ${obj.nombreCompleto}\nFecha Nac: ${obj.fechaNacimiento}`;
+                else if(obj.padre_nombre !== undefined && obj.madre_nombre !== undefined) {
+                    let tPadre = lang === 'en' ? 'Father' : 'Padre';
+                    let tMadre = lang === 'en' ? 'Mother' : 'Madre';
+                    let tNac = lang === 'en' ? 'DOB' : 'Nac';
+                    let tOcu = lang === 'en' ? 'Occ' : 'Ocup';
+                    valor = `[${tPadre}] ${obj.padre_nombre} | ${tNac}: ${obj.padre_fecha} | ${tOcu}: ${obj.padre_ocupacion}\n[${tMadre}] ${obj.madre_nombre} | ${tNac}: ${obj.madre_fecha} | ${tOcu}: ${obj.madre_ocupacion}`;
+                }
                 else if(obj.municipio) valor = `Municipio: ${obj.municipio}\nOtra Nac: ${obj.nac_sino} (${obj.nac_det})`;
                 else if(obj.telefonos) valor = `Tels: ${obj.telefonos}\nRedes: ${obj.redes}`;
                 else if(obj.nombre && obj.fecha) valor = `Cónyuge: ${obj.nombre}\nNac: ${obj.fecha} (${obj.lugar})`;
+                
+                else if(obj.num !== undefined && obj.lista !== undefined) {
+                    if(obj.num === 0) valor = lang === 'en' ? `Children: 0` : `Hijos: 0`;
+                    else {
+                        valor = (lang === 'en' ? `Number of children: ` : `Número de hijos: `) + `${obj.num}\n` + 
+                                obj.lista.map((h, i) => `${lang==='en'?'Child':'Hijo'} ${i+1}: ${h.nombre} (${h.fecha})`).join('\n');
+                    }
+                }
                 else if(obj.nivel) valor = `Nivel: ${obj.nivel}\nCarrera: ${obj.especialidad}\nEscuelas: ${obj.escuelas}`;
                 else if(obj.puesto) valor = `Puesto: ${obj.puesto} (${obj.antiguedad} años)\nSueldo: ${obj.sueldo}\nFunciones: ${obj.funciones}`;
                 else if(obj.motivo) valor = `Motivo: ${obj.motivo}\nFecha: ${obj.fecha} (${obj.tiempo})`;
-                else if(obj.hospedaje) valor = `Hospedaje: ${obj.hospedaje}\nPaga: ${obj.quienPaga}`;
+                else if(obj.acompanantes_sino !== undefined) {
+                    let text = `Quién Paga: ${obj.quienPaga}\nHospedaje: ${obj.hospedaje}\nViaja Acompañado: ${obj.acompanantes_sino}`;
+                    if (obj.acompanantes_sino === 'Sí' || obj.acompanantes_sino === 'Yes') {
+                        let acmDetalles = [];
+                        if (obj.acompanantes_lista && obj.acompanantes_lista.length > 0) acmDetalles.push(...obj.acompanantes_lista);
+                        if (obj.acompanantes_otros) acmDetalles.push(`Otros: ${obj.acompanantes_otros}`);
+                        text += `\nAcompañantes:\n- ` + acmDetalles.join('\n- ');
+                    }
+                    valor = text;
+                }
             } catch(e) {}
         }
 
@@ -1448,7 +1675,6 @@ function mostrarResumen() {
                       <p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
     }
 
-    // AVISO LEGAL IMPRESO AL FINAL DEL REPORTE
     htmlVista += `
         <div style="margin-top: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; color: #555; text-align: justify; page-break-inside: avoid;">
             <strong>${t('disclaimer_gov_title')}</strong> ${t('disclaimer_gov_desc')}
@@ -1473,7 +1699,7 @@ function mostrarResumen() {
     let contentElem = document.getElementById('screenContent');
     if (contentElem) contentElem.innerHTML = pantallaFinal;
 }
-// Función global conectada al botón del selector del header
+
 function setLanguage(lang) {
     appData.idioma = lang;
     localStorage.setItem('datosVisado', JSON.stringify(appData));
