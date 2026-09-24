@@ -1390,8 +1390,8 @@ function mostrarResumen() {
     txtWhats += `*${t('lbl_passport_folio').toUpperCase()}* ${appData.folio_pasaporte}\n\n`;
     
     let htmlVista = `<div class="resumen-header"><h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px;">${t('summary_title')}</h2>`;
-    htmlVista += `<p><b>${t('lbl_country')}</b> ${paisLimpio} <span onclick="editarPasoDesdeResumen(0)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
-    htmlVista += `<p><b>${t('lbl_passport_folio')}</b> ${appData.folio_pasaporte} <span onclick="editarPasoDesdeResumen(2)" style="cursor:pointer;" title="Editar">✏️</span></p></div>`;
+    htmlVista += `<p><b>${t('lbl_country')}</b> ${paisLimpio} <span class="no-print" onclick="editarPasoDesdeResumen(0)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
+    htmlVista += `<p><b>${t('lbl_passport_folio')}</b> ${appData.folio_pasaporte} <span class="no-print" onclick="editarPasoDesdeResumen(2)" style="cursor:pointer;" title="Editar">✏️</span></p></div>`;
     
     htmlVista += `<div class="resumen-grid">`;
     let categoriaActual = "";
@@ -1431,7 +1431,7 @@ function mostrarResumen() {
             <div style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
                 <p style="margin:0; font-size:12px; color:#555;">
                     ${preguntaTXT}
-                    <span onclick="editarPreguntaDesdeResumen('${clave}')" style="cursor:pointer; float:right;" title="Editar">✏️</span>
+                    <span class="no-print" onclick="editarPreguntaDesdeResumen('${clave}')" style="cursor:pointer; float:right;" title="Editar">✏️</span>
                 </p>
                 <p style="margin:0; font-size:15px; font-weight:bold; color:#000; white-space: pre-wrap;">${valor}</p>
             </div>
@@ -1440,13 +1440,20 @@ function mostrarResumen() {
     htmlVista += `</div>`;
 
     if(appData.cita_cas) {
-        htmlVista += `<h3 style="color:var(--color-primario); margin-top:20px;">${t('lbl_biometrics_appt')} <span onclick="editarPasoDesdeResumen(8)" style="cursor:pointer;">✏️</span></h3>
+        htmlVista += `<h3 style="color:var(--color-primario); margin-top:20px;">${t('lbl_biometrics_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(8)" style="cursor:pointer;">✏️</span></h3>
                       <p><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b><br>${appData.cita_cas.lugar}</p>`;
     }
     if(appData.cita_entrevista) {
-        htmlVista += `<h3 style="color:var(--color-primario); margin-top:10px;">${t('lbl_consular_appt')} <span onclick="editarPasoDesdeResumen(11)" style="cursor:pointer;">✏️</span></h3>
+        htmlVista += `<h3 style="color:var(--color-primario); margin-top:10px;">${t('lbl_consular_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(11)" style="cursor:pointer;">✏️</span></h3>
                       <p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
     }
+
+    // AVISO LEGAL IMPRESO AL FINAL DEL REPORTE
+    htmlVista += `
+        <div style="margin-top: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; color: #555; text-align: justify; page-break-inside: avoid;">
+            <strong>${t('disclaimer_gov_title')}</strong> ${t('disclaimer_gov_desc')}
+        </div>
+    `;
 
     let textoCodificado = encodeURIComponent(txtWhats);
 
@@ -1454,19 +1461,18 @@ function mostrarResumen() {
         <div id="areaImprimir" style="text-align:left; background:#fff; padding:20px; border:1px solid #ccc; max-height: 450px; overflow-y: auto; border-radius: 8px;">
             ${htmlVista}
         </div>
-        <div class="button-group-desktop" style="margin-top:20px;">
+        <div class="button-group-desktop no-print" style="margin-top:20px;">
             <button class="success" onclick="window.print()">${t('btn_print')}</button>
             <button class="whatsapp" onclick="window.open('https://api.whatsapp.com/send?text=${textoCodificado}', '_blank')">${t('btn_whatsapp')}</button>
             <button class="secondary" onclick="renderScreen(13)">${t('btn_go_back')}</button>
         </div>
-        <hr style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0 15px 0;">
-        <button onclick="confirmarBorrado()" style="background: var(--color-acento); color: white;">${t('btn_new_request')}</button>
+        <hr class="no-print" style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0 15px 0;">
+        <button class="no-print" onclick="confirmarBorrado()" style="background: var(--color-acento); color: white;">${t('btn_new_request')}</button>
     `;
     
     let contentElem = document.getElementById('screenContent');
     if (contentElem) contentElem.innerHTML = pantallaFinal;
 }
-
 // Función global conectada al botón del selector del header
 function setLanguage(lang) {
     appData.idioma = lang;
