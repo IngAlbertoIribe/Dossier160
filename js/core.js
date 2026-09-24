@@ -374,7 +374,14 @@ const cuestionarioBase = [
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
         id: "visitas_anteriores", 
         pregunta: { es: "¿HA ESTADO ALGUNA VEZ EN EL PAÍS DESTINO? (FECHAS):", en: "HAVE YOU EVER BEEN TO THE DESTINATION COUNTRY? (DATES):" }, 
-        tip: { es: "Revisa los sellos de tu pasaporte anterior.", en: "Check entry stamps on your previous passports." }, 
+        tip: { 
+            es: "Enumera tus últimos 5 viajes indicando la fecha (mes/año) y cuánto tiempo te quedaste. Si no recuerdas el día exacto, un estimado es válido.", 
+            en: "List your last 5 visits including the month/year of entry and length of stay. Estimates are fine if you don't recall the exact day." 
+        },
+        placeholder: { 
+            es: "Ej.\n1. Dic 2022 (2 semanas)\n2. Mar 2019 (5 días)", 
+            en: "e.g.,\n1. Dec 2022 (2 weeks)\n2. Mar 2019 (5 days)" 
+        },
         tipo: "sino_texto" 
     },
     { 
@@ -388,7 +395,7 @@ const cuestionarioBase = [
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
         id: "visas_historial_combo", 
         pregunta: { es: "HISTORIAL DE VISAS E INCONVENIENTES EN EL DESTINO:", en: "VISA HISTORY & PREVIOUS ISSUES AT DESTINATION:" }, 
-        tip: { es: "⚠️ IMPORTANTE: Información exacta sobre visas otorgadas o inconvenientes previos.", en: "⚠️ IMPORTANT: Exact details about previously issued visas or past entry issues/refusals." }, 
+        tip: { es: "⚠️ IMPORTANTE: Detalla fechas (año), lugar de emisión o incidente, tipo de visa y una breve explicación de ser necesario.", en: "⚠️ IMPORTANT: Detail dates (year), place of issuance or incident, visa type, and a brief explanation if necessary." }, 
         tipo: "visas_historial_combo" 
     },
     { 
@@ -740,7 +747,7 @@ function renderScreen(pasoForzado = null) {
                             <label>2. ${lang === 'en' ? 'Neighborhood / Suburb:' : 'Colonia:'}</label><select id="colonia_select"></select>
                             <label style="margin-top: 10px; display:block;">3. ${lang === 'en' ? 'Street and Number:' : 'Calle y Número:'}</label><input type="text" id="calle_input" placeholder="Ej. Calle 123">
                         </div>
-                        ${respuestaPrevia ? `<p style="font-size:13px; color:var(--color-primario);"><b>${lang === 'en' ? 'Saved:' : 'Guardado:'}</b>${respuestaPrevia}</p>` : ''}
+                        ${respuestaPrevia ? `<p style="font-size:13px; color:var(--color-primario);"><b>${lang === 'en' ? 'Saved:' : 'Guardado:'}</b> ${respuestaPrevia}</p>` : ''}
                     </div>`;
             }
             else if (q.tipo === "nombre_nacimiento_combo") {
@@ -826,7 +833,13 @@ function renderScreen(pasoForzado = null) {
             else if (q.tipo === "hijos_combo") {
                 let d = { num: 0, lista: [] };
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
-                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                    try { 
+                        let parsed = JSON.parse(respuestaPrevia); 
+                        if (parsed.lista) {
+                            d.num = parsed.num || 0;
+                            d.lista = parsed.lista;
+                        }
+                    } catch(e){} 
                 }
                 
                 html += `
@@ -864,7 +877,7 @@ function renderScreen(pasoForzado = null) {
                             d.padre_nombre = parsed.nombres;
                             d.padre_ocupacion = parsed.ocupacion;
                         } else {
-                            d = parsed;
+                            d = { ...d, ...parsed };
                         }
                     } catch(e){} 
                 }
@@ -914,7 +927,6 @@ function renderScreen(pasoForzado = null) {
                     ? ["Primary School", "Secondary School", "High School", "Technical / Vocational", "Bachelors Degree / Engineering", "Masters Degree", "Doctorate", "None"]
                     : ["Primaria", "Secundaria", "Preparatoria / Bachillerato", "Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Ninguno"];
                 
-                // Función inline de validación sin apóstrofes para evitar problemas
                 html += `
                     <div>
                         <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Education Level:' : 'Nivel de Estudios:'}</label>
@@ -1153,7 +1165,7 @@ function renderScreen(pasoForzado = null) {
                         </select>
                     </div>
                     <div id="div_vis_otorgada" class="full-width" style="display: ${(d.otorgada_sino === 'Sí' || d.otorgada_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
-                        <textarea id="vis_otorgada_det" placeholder="${lang === 'en' ? 'Issued visa details...' : 'Detalles de la visa otorgada...'}">${d.otorgada_det || ''}</textarea>
+                        <textarea id="vis_otorgada_det" placeholder="${lang === 'en' ? 'e.g., B1/B2 Visa, issued in Monterrey in Aug 2018...' : 'Ej. Visa B1/B2, emitida en Monterrey en Ago 2018...'}">${d.otorgada_det || ''}</textarea>
                     </div>
 
                     <div>
@@ -1165,7 +1177,7 @@ function renderScreen(pasoForzado = null) {
                         </select>
                     </div>
                     <div id="div_vis_perdidarobada" class="full-width" style="display: ${(d.perdidarobada_sino === 'Sí' || d.perdidarobada_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
-                        <textarea id="vis_perdidarobada_det" placeholder="${lang === 'en' ? 'Circumstances and year...' : 'Circunstancias y año...'}">${d.perdidarobada_det || ''}</textarea>
+                        <textarea id="vis_perdidarobada_det" placeholder="${lang === 'en' ? 'e.g., Stolen in CDMX in 2019, report #12345...' : 'Ej. Robada en CDMX en 2019, reporte folio 12345...'}">${d.perdidarobada_det || ''}</textarea>
                     </div>
 
                     <div class="full-width">
@@ -1177,7 +1189,7 @@ function renderScreen(pasoForzado = null) {
                         </select>
                     </div>
                     <div id="div_vis_problemas" class="full-width" style="display: ${(d.problemas_sino === 'Sí' || d.problemas_sino === 'Yes') ? 'block' : 'none'}; margin-top:10px;">
-                        <textarea id="vis_problemas_det" placeholder="${lang === 'en' ? 'Explain situation...' : 'Explique la situación...'}">${d.problemas_det || ''}</textarea>
+                        <textarea id="vis_problemas_det" placeholder="${lang === 'en' ? 'e.g., Denied in 2020 under section 214(b)...' : 'Ej. Negada en 2020 bajo la sección 214(b)...'}">${d.problemas_det || ''}</textarea>
                     </div>
                 `;
             }
@@ -1185,6 +1197,10 @@ function renderScreen(pasoForzado = null) {
                 let isSi = respuestaPrevia.startsWith("Sí") || respuestaPrevia.startsWith("Yes");
                 let detalle = isSi ? respuestaPrevia.replace(/^(Sí|Yes):?\s*/i, "") : "";
                 let isNo = respuestaPrevia === "No";
+                
+                let defaultPlaceholder = lang === 'en' ? 'Required details...' : 'Detalles requeridos...';
+                let txtPlaceholder = q.placeholder ? (q.placeholder[lang] || q.placeholder['es']) : defaultPlaceholder;
+
                 html += `
                     <div class="full-width">
                         <select id="respuestaDS160_sino" onchange="document.getElementById('div_detalle').style.display = (this.value === 'Sí' || this.value === 'Yes') ? 'block' : 'none'">
@@ -1194,7 +1210,7 @@ function renderScreen(pasoForzado = null) {
                         </select>
                     </div>
                     <div id="div_detalle" class="full-width" style="display: ${isSi ? 'block' : 'none'}; margin-top: 10px;">
-                        <textarea id="respuestaDS160_detalle" placeholder="${lang === 'en' ? 'Required details...' : 'Detalles requeridos...'}">${detalle}</textarea>
+                        <textarea id="respuestaDS160_detalle" placeholder="${txtPlaceholder}">${detalle}</textarea>
                     </div>
                 `;
             }
