@@ -86,6 +86,12 @@ const i18n = {
         disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
         disclaimer_gov_desc: "Esta aplicación es una herramienta de asistencia independiente para organizar expedientes de viaje. NO representa, NO está afiliada y NO es respaldada por ninguna entidad gubernamental de ningún país.",
         btn_search_cp: "Buscar",
+        select_purpose: "¿Cuál es el motivo principal de tu viaje?",
+        opt_tourism: "Turismo / Vacaciones / Visita Médica",
+        opt_business: "Negocios / Conferencias",
+        opt_study: "Estudios / Intercambio",
+        opt_work: "Trabajo / Empleo temporal",
+        opt_other: "Otro",
         accept_disclaimer: "Entiendo y acepto que esta aplicación es independiente y no pertenece a ningún gobierno.",
         msg_accept_disclaimer: "Debes aceptar el aviso marcando la casilla para poder continuar."
     },
@@ -171,6 +177,12 @@ const i18n = {
         disclaimer_gov_title: "⚠️ GOVERNMENT DISCLAIMER:",
         disclaimer_gov_desc: "This app is an independent assistance tool for organizing travel dossiers. It DOES NOT represent, IS NOT affiliated with, and IS NOT endorsed by any government entity of any country.",
         btn_search_cp: "Search",
+        select_purpose: "What is the primary purpose of your trip?",
+        opt_tourism: "Tourism / Vacation / Medical Treatment",
+        opt_business: "Business / Conferences",
+        opt_study: "Study / Exchange",
+        opt_work: "Work / Temporary Employment",
+        opt_other: "Other",
         accept_disclaimer: "I understand and accept that this application is independent and does not belong to any government.",
         msg_accept_disclaimer: "You must accept the disclaimer by checking the box to continue."
     }
@@ -194,7 +206,7 @@ window.generarCamposHijos = function(num, lang) {
     container.innerHTML = html;
 };
 
-// Cuestionario Base Bilingüe
+// Cuestionario Base Bilingüe (Orden Actualizado: Plan de viaje es el #1)
 const cuestionarioBase = [
     { 
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
@@ -401,6 +413,7 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", 
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
+    motivo_viaje: "",
     folio_pasaporte: "", 
     ds160_index: 0, 
     respuestas_ds160: {}, 
@@ -964,7 +977,7 @@ function renderScreen(pasoForzado = null) {
                 html += `
                     <div class="full-width">
                         <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Primary Purpose of Trip:' : 'Motivo Principal de Viaje:'}</label>
-                        <textarea id="pln_motivo">${d.motivo}</textarea>
+                        <textarea id="pln_motivo" placeholder="${lang === 'en' ? 'Tourism, business, medical...' : 'Turismo, negocios, estudios...'}">${d.motivo}</textarea>
                     </div>
                     <div>
                         <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Estimated Arrival Date:' : 'Fecha Aproximada:'}</label>
@@ -1058,7 +1071,6 @@ function renderScreen(pasoForzado = null) {
                 }
 
                 html += `
-                    <!-- PREGUNTA 1: FAMILIARES CERCANOS -->
                     <label style="font-size:14px; font-weight:bold; margin-top:10px; display:block;">
                         1. ¿Tiene Esposo(a), Padres, Hermanos o Hijos en ${paisLimpio}?:
                     </label>
@@ -1072,7 +1084,6 @@ function renderScreen(pasoForzado = null) {
                         <textarea id="cnt_cercanos_det" placeholder="...">${d.cercanos_det || ''}</textarea>
                     </div>
 
-                    <!-- PREGUNTA 2: OTROS FAMILIARES -->
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
                         2. ¿Tiene algún otro familiar viviendo en ${paisLimpio}?:
                     </label>
@@ -1086,7 +1097,6 @@ function renderScreen(pasoForzado = null) {
                         <textarea id="cnt_otros_det" placeholder="...">${d.otros_det || ''}</textarea>
                     </div>
 
-                    <!-- PREGUNTA 3: VIAJES INTERNACIONALES -->
                     <label style="font-size:14px; font-weight:bold; margin-top:15px; display:block;">
                         3. En los últimos 5 años ¿ha viajado a otro país diferente al tuyo o al destino?:
                     </label>
@@ -1327,7 +1337,6 @@ function renderScreen(pasoForzado = null) {
 function guardarPaisInicial() {
     let selectPais = document.getElementById('selectPaisDestino');
     if (selectPais) appData.pais_destino = selectPais.value;
-    
     avanzarPaso(1);
 }
 
@@ -1553,7 +1562,7 @@ function confirmarBorrado() {
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
     welcomeSubstep = 1;
-    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
 
