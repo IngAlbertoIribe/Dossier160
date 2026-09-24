@@ -493,17 +493,149 @@ function formatearTextoPregunta(textoOriginalObj, paisActual) {
         .replace("PAÍS DESTINO", paisLimpio);
 }
 
-function mostrarAlerta(mensaje) {
-    let modal = document.getElementById('customModal');
-    let acciones = document.getElementById('modalActions');
-    let msgElem = document.getElementById('modalMessage');
-    if (msgElem) msgElem.innerText = mensaje;
-    if (acciones) {
-        acciones.innerHTML = `<button onclick="cerrarModal()">${t('btn_accept')}</button>`;
-    }
-    if (modal) modal.style.display = 'flex';
-}
+function mostrarResumen() {
+    let lang = appData.idioma || "es";
+    let paisActual = appData.pais_destino || "Estados Unidos 🇺🇸";
+    let paisLimpio = obtenerNombrePaisLimpio(paisActual);
+    
+    let txtWhats = `*===== ${t('summary_title').toUpperCase()} =====*\n`;
+    txtWhats += `*${t('lbl_country').toUpperCase()}* ${paisLimpio}\n`;
+    txtWhats += `*${t('lbl_passport_folio').toUpperCase()}* ${appData.folio_pasaporte}\n\n`;
+    
+    let htmlVista = `
+        <style>
+            @media print {
+                #areaImprimir {
+                    max-height: none !important;
+                    overflow: visible !important;
+                    border: none !important;
+                }
+                body { background: #fff !important; }
+            }
+        </style>
+        <div class="resumen-header">
+            <h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px;">${t('summary_title')}</h2>
+        </div>
+    `;
+    
+    htmlVista += `<p><b>${t('lbl_country')}</b> ${paisLimpio} <span class="no-print" onclick="editarPasoDesdeResumen(0)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
+    htmlVista += `<p><b>${t('lbl_passport_folio')}</b> ${appData.folio_pasaporte} <span class="no-print" onclick="editarPasoDesdeResumen(2)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
+    
+    htmlVista += `<div class="resumen-grid">`;
+    let categoriaActual = "";
 
+    for (const [clave, valorOrig] of Object.entries(appData.respuestas_ds160)) {
+        let p = cuestionarioBase.find(item => item.id === clave);
+        if(valorOrig === "No aplica") continue;
+        
+        let valor = valorOrig;
+        if(typeof valor === 'string' && valor.startsWith("{")) {
+            try {
+                let obj = JSON.parse(valor);
+                if(obj.nombreCompleto) {
+                    valor = `Nombre: ${obj.nombreCompleto}\nFecha Nac: ${obj.fechaNacimiento}`;
+                } else if(obj.padre_nombre !== undefined && obj.madre_nombre !== undefined) {
+                    let tPadre = lang === 'en' ? 'Father' : 'Padre';
+                    let tMadre = lang === 'en' ? 'Mother' : 'Madre';
+                    let tNac = lang === 'en' ? 'DOB' : 'Nac';
+                    let tOcu = lang === 'en' ? 'Occ' : 'Ocup';
+                    valor = `[${tPadre}] ${obj.padre_nombre} | ${tNac}: ${obj.padre_fecha} | ${tOcu}: ${obj.padre_ocupacion}\n[${tMadre}] ${obj.madre_nombre} | ${tNac}: ${obj.madre_fecha} | ${tOcu}: ${obj.madre_ocupacion}`;
+                } else if(obj.municipio) {
+                    valor = `Municipio: ${obj.municipio}\nOtra Nac: ${obj.nac_sino} (${obj.nac_det})`;
+                } else if(obj.telefonos) {
+                    valor = `Tels: ${obj.telefonos}\nRedes: ${obj.redes}\nOtros Tels/Emails (5 años): ${obj.prev_sino} (${obj.prev_det})`;
+                } else if(obj.nombre && obj.fecha) {
+                    valor = `Cónyuge: ${obj.nombre}\nNac: ${obj.fecha} (${obj.lugar})`;
+                } else if(obj.num !== undefined && obj.lista !== undefined) {
+                    if(obj.num === 0) valor = lang === 'en' ? `Children: 0` : `Hijos: 0`;
+                    else {
+                        valor = (lang === 'en' ? `Number of children: ` : `Número de hijos: `) + `${obj.num}\n` + 
+                                obj.lista.map((h, i) => `${lang==='en'?'Child':'Hijo'} ${i+1}: ${h.nombre} (${h.fecha})`).join('\n');
+                    }
+                } else if(obj.nivel) {
+                    valor = `Nivel: ${obj.nivel}\nCarrera: ${obj.especialidad}\nEscuelas: ${obj.escuelas}`;
+                } else if(obj.puesto) {
+                    valor = `Puesto: ${obj.puesto} (${obj.antiguedad} años)\nSueldo: ${obj.sueldo}\nFunciones: ${obj.funciones}`;
+                } else if(obj.motivo) {
+                    valor = `Motivo: ${obj.motivo}\nFecha: ${obj.fecha} (${obj.tiempo})`;
+                } else if(obj.acompanantes_sino !== undefined) {
+                    let text = `Quién Paga: ${obj.quienPaga}\nHospedaje: ${obj.hospedaje}\nViaja Acompañado: ${obj.acompanantes_sino}`;
+                    if (obj.acompanantes_sino === 'Sí' || obj.acompanantes_sino === 'Yes') {
+                        let acmDetalles = [];
+                        if (obj.acompanantes_lista && obj.acompanantes_lista.length > 0) acmDetalles.push(...obj.acompanantes_lista);
+                        if (obj.acompanantes_otros) acmDetalles.push(`Otros: ${obj.acompanantes_otros}`);
+                        text += `\nAcompañantes:\n- ` + acmDetalles.join('\n- ');
+                    }
+                    valor = text;
+                } else if(obj.cercanos_sino !== undefined) {
+                    valor = `Familiares cercanos en destino: ${obj.cercanos_sino}\nDetalle: ${obj.cercanos_det}\nOtros familiares: ${obj.otros_sino}\nDetalle: ${obj.otros_det}\nViajes internacionales (5 años): ${obj.viajes_sino}\nDetalle: ${obj.viajes_det}`;
+                } else if(obj.lugarEmision !== undefined) {
+                    valor = `Lugar de Emisión: ${obj.lugarEmision}\nRobo/Extravío: ${obj.robo_sino}\nDetalle: ${obj.robo_det}`;
+                } else if(obj.otorgada_sino !== undefined) {
+                    valor = `Visa previa: ${obj.otorgada_sino}\nDetalle: ${obj.otorgada_det}\nVisa robada/cancelada: ${obj.perdidarobada_sino}\nDetalle: ${obj.perdidarobada_det}\nProblemas/Negada: ${obj.problemas_sino}\nDetalle: ${obj.problemas_det}`;
+                } else if(obj.nombre && obj.direccion) {
+                    valor = `Empresa/Institución: ${obj.nombre}\nDirección y Teléfono: ${obj.direccion}`;
+                }
+            } catch(e) {}
+        }
+
+        if(p) {
+            let catTXT = typeof p.categoria === 'object' ? (p.categoria[lang] || p.categoria['es']) : p.categoria;
+            if(catTXT !== categoriaActual) {
+                categoriaActual = catTXT;
+                txtWhats += `\n*--- SECCIÓN: ${categoriaActual} ---*\n`;
+                htmlVista += `<h3 class="full-width" style="background:var(--color-acento); color:#fff; padding:6px; border-radius:4px; margin-top:15px;">${categoriaActual}</h3>`;
+            }
+        }
+
+        let preguntaTXT = p ? formatearTextoPregunta(p.pregunta, paisLimpio) : clave.toUpperCase();
+        txtWhats += `*${preguntaTXT}*\n${valor}\n\n`;
+        
+        htmlVista += `
+            <div style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                <p style="margin:0; font-size:12px; color:#555;">
+                    ${preguntaTXT}
+                    <span class="no-print" onclick="editarPreguntaDesdeResumen('${clave}')" style="cursor:pointer; float:right;" title="Editar">✏️</span>
+                </p>
+                <p style="margin:0; font-size:15px; font-weight:bold; color:#000; white-space: pre-wrap;">${valor}</p>
+            </div>
+        `;
+    }
+    htmlVista += `</div>`;
+
+    if(appData.cita_cas) {
+        htmlVista += `<h3 style="color:var(--color-primario); margin-top:20px;">${t('lbl_biometrics_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(8)" style="cursor:pointer;">✏️</span></h3>
+                      <p><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b><br>${appData.cita_cas.lugar}</p>`;
+    }
+    if(appData.cita_entrevista) {
+        htmlVista += `<h3 style="color:var(--color-primario); margin-top:10px;">${t('lbl_consular_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(11)" style="cursor:pointer;">✏️</span></h3>
+                      <p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
+    }
+
+    htmlVista += `
+        <div style="margin-top: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; color: #555; text-align: justify; page-break-inside: avoid;">
+            <strong>${t('disclaimer_gov_title')}</strong> ${t('disclaimer_gov_desc')}
+        </div>
+    `;
+
+    let textoCodificado = encodeURIComponent(txtWhats);
+
+    let pantallaFinal = `
+        <div id="areaImprimir" style="text-align:left; background:#fff; padding:20px; border:1px solid #ccc; max-height: 450px; overflow-y: auto; border-radius: 8px;">
+            ${htmlVista}
+        </div>
+        <div class="button-group-desktop no-print" style="margin-top:20px;">
+            <button class="success" onclick="window.print()">${t('btn_print')}</button>
+            <button class="whatsapp" onclick="window.open('https://api.whatsapp.com/send?text=${textoCodificado}', '_blank')">${t('btn_whatsapp')}</button>
+            <button class="secondary" onclick="renderScreen(13)">${t('btn_go_back')}</button>
+        </div>
+        <hr class="no-print" style="border: 0; border-top: 1px dashed #ccc; margin: 25px 0 15px 0;">
+        <button class="no-print" onclick="confirmarBorrado()" style="background: var(--color-acento); color: white;">${t('btn_new_request')}</button>
+    `;
+    
+    let contentElem = document.getElementById('screenContent');
+    if (contentElem) contentElem.innerHTML = pantallaFinal;
+}
 function mostrarConfirmacion(mensaje, funcionAceptar) {
     let modal = document.getElementById('customModal');
     let acciones = document.getElementById('modalActions');
