@@ -303,7 +303,7 @@ const cuestionarioBase = [
     { 
         categoria: { es: "PERSONAL", en: "PERSONAL" }, 
         id: "padres_combo", 
-        pregunta: { es: "INFORMACIÓN DE SUS PADRES:", en: "PARENTS' INFORMATION:" }, 
+        pregunta: { es: "INFORMACIÓN DE SUS PADRES:", en: "PARENTS DETAILS:" }, 
         tip: { es: "⚠️ OBLIGATORIO: Nombres completos, fechas de nacimiento y ocupación de AMBOS padres.", en: "⚠️ MANDATORY: Full names, dates of birth, and occupation of BOTH parents." }, 
         tipo: "padres_combo" 
     },
@@ -413,6 +413,7 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", 
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
+    motivo_viaje: "",
     folio_pasaporte: "", 
     ds160_index: 0, 
     respuestas_ds160: {}, 
@@ -823,16 +824,9 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "hijos_combo") {
-                // Escudo de retrocompatibilidad
                 let d = { num: 0, lista: [] };
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
-                    try { 
-                        let parsed = JSON.parse(respuestaPrevia); 
-                        if (parsed.lista) {
-                            d.num = parsed.num || 0;
-                            d.lista = parsed.lista;
-                        }
-                    } catch(e){} 
+                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
                 }
                 
                 html += `
@@ -859,7 +853,6 @@ function renderScreen(pasoForzado = null) {
                 html += `</div>`;
             }
             else if (q.tipo === "padres_combo") {
-                // Escudo de retrocompatibilidad
                 let d = {
                     padre_nombre: "", padre_fecha: "", padre_ocupacion: "",
                     madre_nombre: "", madre_fecha: "", madre_ocupacion: ""
@@ -871,14 +864,14 @@ function renderScreen(pasoForzado = null) {
                             d.padre_nombre = parsed.nombres;
                             d.padre_ocupacion = parsed.ocupacion;
                         } else {
-                            d = { ...d, ...parsed };
+                            d = parsed;
                         }
                     } catch(e){} 
                 }
                 
                 html += `
                     <div class="full-width" style="background: #f4f6f8; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e1e4e8;">
-                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "FATHER'S INFORMATION" : 'DATOS DEL PADRE'}</h4>
+                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "FATHER DETAILS" : 'DATOS DEL PADRE'}</h4>
                         
                         <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
                         <input type="text" id="padre_nombre" value="${d.padre_nombre || ''}" style="margin-bottom: 15px;" placeholder="${lang === 'en' ? 'First and Last Names' : 'Nombre(s) y Apellidos'}">
@@ -896,7 +889,7 @@ function renderScreen(pasoForzado = null) {
                     </div>
 
                     <div class="full-width" style="background: #f4f6f8; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e1e4e8;">
-                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "MOTHER'S INFORMATION" : 'DATOS DE LA MADRE'}</h4>
+                        <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--color-primario);">${lang === 'en' ? "MOTHER DETAILS" : 'DATOS DE LA MADRE'}</h4>
                         
                         <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Full Name:' : 'Nombre Completo:'}</label>
                         <input type="text" id="madre_nombre" value="${d.madre_nombre || ''}" style="margin-bottom: 15px;" placeholder="${lang === 'en' ? 'First and Last Names' : 'Nombre(s) y Apellidos'}">
@@ -918,21 +911,19 @@ function renderScreen(pasoForzado = null) {
                 let datosEdu = {nivel: "", especialidad: "", escuelas: ""};
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { datosEdu = JSON.parse(respuestaPrevia); } catch(e){} }
                 let niveles = lang === 'en' 
-                    ? ["Primary School", "Secondary School", "High School", "Technical / Vocational", "Bachelor's / Engineering", "Master's", "Doctorate", "None"]
+                    ? ["Primary School", "Secondary School", "High School", "Technical / Vocational", "Bachelors Degree / Engineering", "Masters Degree", "Doctorate", "None"]
                     : ["Primaria", "Secundaria", "Preparatoria / Bachillerato", "Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Ninguno"];
-                let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Technical / Vocational", "Bachelor's / Engineering", "Master's", "Doctorate"].includes(datosEdu.nivel);
+                
+                // Función inline de validación sin apóstrofes para evitar problemas
                 html += `
                     <div>
                         <label style="font-size:14px; font-weight:bold; display:block;">1. ${lang === 'en' ? 'Education Level:' : 'Nivel de Estudios:'}</label>
-                        <select id="edu_nivel" onchange="
-                            let req = ['Carrera Técnica', 'Licenciatura / Ingeniería', 'Maestría', 'Doctorado', 'Technical / Vocational', 'Bachelor\\'s / Engineering', 'Master\\'s', 'Doctorate'].includes(this.value);
-                            document.getElementById('div_especialidad').style.display = req ? 'block' : 'none';
-                        ">
+                        <select id="edu_nivel" onchange="document.getElementById('div_especialidad').style.display = ['Carrera Técnica', 'Licenciatura / Ingeniería', 'Maestría', 'Doctorado', 'Technical / Vocational', 'Bachelors Degree / Engineering', 'Masters Degree', 'Doctorate'].includes(this.value) ? 'block' : 'none';">
                             <option value="">${t('select_default')}</option>
                             ${niveles.map(o => `<option value="${o}" ${datosEdu.nivel === o ? 'selected':''}>${o}</option>`).join('')}
                         </select>
                     </div>
-                    <div id="div_especialidad" style="display: ${requiereEspecialidad ? 'block' : 'none'}; margin-top: 10px;">
+                    <div id="div_especialidad" style="display: ${['Carrera Técnica', 'Licenciatura / Ingeniería', 'Maestría', 'Doctorado', 'Technical / Vocational', 'Bachelors Degree / Engineering', 'Masters Degree', 'Doctorate'].includes(datosEdu.nivel) ? 'block' : 'none'}; margin-top: 10px;">
                         <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Major / Specialty:' : 'Especialidad / Carrera:'}</label>
                         <input type="text" id="edu_especialidad" value="${datosEdu.especialidad && !['No aplica', 'N/A'].includes(datosEdu.especialidad) ? datosEdu.especialidad : ''}">
                     </div>
@@ -997,7 +988,6 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "logistica_combo") {
-                // Escudo de retrocompatibilidad robusto
                 let d = { hospedaje: "", quienPaga: "", acompanantes_sino: "", acompanantes_lista: [], acompanantes_otros: "" };
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
                     try { 
@@ -1010,14 +1000,12 @@ function renderScreen(pasoForzado = null) {
                     } catch(e){} 
                 }
 
-                // Extraer datos del cónyuge
                 let esposoData = appData.respuestas_ds160['esposo_combo'];
                 let esposoObj = null;
                 if (esposoData && esposoData !== "No aplica" && esposoData.startsWith("{")) {
                     try { esposoObj = JSON.parse(esposoData); } catch(e){}
                 }
 
-                // Extraer datos de los hijos
                 let hijosData = appData.respuestas_ds160['datos_hijos'];
                 let hijosObj = null;
                 if (hijosData && hijosData !== "No aplica" && hijosData.startsWith("{")) {
@@ -1060,7 +1048,7 @@ function renderScreen(pasoForzado = null) {
                     </div>
                     <div class="full-width">
                         <label style="font-size:14px; font-weight:bold; display:block;">2. ${lang === 'en' ? 'Destination Accommodation:' : 'Hospedaje en Destino:'}</label>
-                        <textarea id="log_hospedaje" style="margin-bottom: 15px;" placeholder="${lang==='en'?'Hotel name or friend\\'s address...':'Nombre del hotel o dirección...'}">${d.hospedaje}</textarea>
+                        <textarea id="log_hospedaje" style="margin-bottom: 15px;" placeholder="${lang==='en'?'Hotel name or address...':'Nombre del hotel o dirección...'}">${d.hospedaje}</textarea>
                     </div>
                     <div class="full-width">
                         <label style="font-size:14px; font-weight:bold; display:block;">3. ${lang === 'en' ? 'Are you traveling with anyone?:' : '¿Viaja Acompañado?:'}</label>
@@ -1077,7 +1065,6 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "contactos_combo") {
-                // Escudo de retrocompatibilidad
                 let d = {
                     cercanos_sino: "", cercanos_det: "",
                     otros_sino: "", otros_det: "",
@@ -1357,7 +1344,22 @@ function renderScreen(pasoForzado = null) {
 
 function guardarPaisInicial() {
     let selectPais = document.getElementById('selectPaisDestino');
+    let selectMotivo = document.getElementById('selectMotivoViaje');
+    
     if (selectPais) appData.pais_destino = selectPais.value;
+    
+    if (selectMotivo) {
+        let motivo = selectMotivo.value;
+        if (!motivo) { 
+            mostrarAlerta(t('msg_enter_required')); 
+            return; 
+        }
+        appData.motivo_viaje = motivo;
+        
+        if (!appData.respuestas_ds160['plan_viaje_combo']) {
+            appData.respuestas_ds160['plan_viaje_combo'] = JSON.stringify({motivo: motivo, fecha: "", tiempo: ""});
+        }
+    }
     
     avanzarPaso(1);
 }
@@ -1433,7 +1435,7 @@ function guardarRespuestaCuestionario(id, tipo) {
     else if(tipo === "educacion_combo") {
         let n = document.getElementById('edu_nivel').value;
         let esc = document.getElementById('edu_escuelas').value.trim();
-        let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Technical / Vocational", "Bachelor's / Engineering", "Master's", "Doctorate"].includes(n);
+        let requiereEspecialidad = ["Carrera Técnica", "Licenciatura / Ingeniería", "Maestría", "Doctorado", "Technical / Vocational", "Bachelors Degree / Engineering", "Masters Degree", "Doctorate"].includes(n);
         let e = requiereEspecialidad ? document.getElementById('edu_especialidad').value.trim() : "No aplica";
         if(!n || !esc) { mostrarAlerta(t('msg_enter_required')); return; }
         v = JSON.stringify({nivel: n, especialidad: e, escuelas: esc});
@@ -1584,7 +1586,7 @@ function confirmarBorrado() {
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
     welcomeSubstep = 1;
-    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
 
