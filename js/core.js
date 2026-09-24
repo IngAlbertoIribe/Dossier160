@@ -86,12 +86,6 @@ const i18n = {
         disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
         disclaimer_gov_desc: "Esta aplicación es una herramienta de asistencia independiente para organizar expedientes de viaje. NO representa, NO está afiliada y NO es respaldada por ninguna entidad gubernamental de ningún país.",
         btn_search_cp: "Buscar",
-        select_purpose: "¿Cuál es el motivo principal de tu viaje?",
-        opt_tourism: "Turismo / Vacaciones / Visita Médica",
-        opt_business: "Negocios / Conferencias",
-        opt_study: "Estudios / Intercambio",
-        opt_work: "Trabajo / Empleo temporal",
-        opt_other: "Otro",
         accept_disclaimer: "Entiendo y acepto que esta aplicación es independiente y no pertenece a ningún gobierno.",
         msg_accept_disclaimer: "Debes aceptar el aviso marcando la casilla para poder continuar."
     },
@@ -177,19 +171,20 @@ const i18n = {
         disclaimer_gov_title: "⚠️ GOVERNMENT DISCLAIMER:",
         disclaimer_gov_desc: "This app is an independent assistance tool for organizing travel dossiers. It DOES NOT represent, IS NOT affiliated with, and IS NOT endorsed by any government entity of any country.",
         btn_search_cp: "Search",
-        select_purpose: "What is the primary purpose of your trip?",
-        opt_tourism: "Tourism / Vacation / Medical Treatment",
-        opt_business: "Business / Conferences",
-        opt_study: "Study / Exchange",
-        opt_work: "Work / Temporary Employment",
-        opt_other: "Other",
         accept_disclaimer: "I understand and accept that this application is independent and does not belong to any government.",
         msg_accept_disclaimer: "You must accept the disclaimer by checking the box to continue."
     }
 };
 
-// Cuestionario Base Bilingüe
+// Cuestionario Base Bilingüe (Orden Actualizado)
 const cuestionarioBase = [
+    { 
+        categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
+        id: "plan_viaje_combo", 
+        pregunta: { es: "PLAN DE VIAJE AL DESTINO:", en: "TRAVEL PLAN TO DESTINATION:" }, 
+        tip: { es: "Escribe detalladamente tu motivo de viaje, fecha proyectada y días de estancia.", en: "Detail the primary purpose of your trip, estimated arrival date, and duration of stay." }, 
+        tipo: "plan_viaje_combo" 
+    },
     { 
         categoria: { es: "PERSONAL", en: "PERSONAL" }, 
         id: "email", 
@@ -326,13 +321,6 @@ const cuestionarioBase = [
     },
     { 
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
-        id: "plan_viaje_combo", 
-        pregunta: { es: "PLAN DE VIAJE AL DESTINO:", en: "TRAVEL PLAN TO DESTINATION:" }, 
-        tip: { es: "Motivo del viaje, fecha proyectada y días de estancia.", en: "Purpose of trip, estimated arrival date, and duration of stay." }, 
-        tipo: "plan_viaje_combo" 
-    },
-    { 
-        categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
         id: "logistica_viaje_combo", 
         pregunta: { es: "HOSPEDAJE Y FINANCIAMIENTO DEL VIAJE:", en: "ACCOMMODATION & TRIP FUNDING:" }, 
         tip: { es: "Lugar donde te hospedarás, quién cubre los gastos y si viajas acompañado.", en: "Where you will stay, who pays for the trip, and accompanying travelers." }, 
@@ -396,7 +384,6 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", // Idioma por defecto
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
-    motivo_viaje: "",
     folio_pasaporte: "", 
     ds160_index: 0, 
     respuestas_ds160: {}, 
@@ -619,7 +606,7 @@ function renderScreen(pasoForzado = null) {
                     </div>
                 `;
             } else if (welcomeSubstep === 3) {
-                // PASO 3: Destino y Motivo de Viaje
+                // PASO 3: Destino de Viaje
                 html = `
                     <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✈️</div>
                     <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_desc_title')}</h2>
@@ -637,17 +624,6 @@ function renderScreen(pasoForzado = null) {
                                 <option value="Europa / Espacio Schengen 🇪🇺" ${appData.pais_destino === "Europa / Espacio Schengen 🇪🇺" ? "selected":""}>Europa / Espacio Schengen 🇪🇺</option>
                                 <option value="Japón 🇯🇵" ${appData.pais_destino === "Japón 🇯🇵" ? "selected":""}>Japón 🇯🇵</option>
                                 <option value="Australia 🇦🇺" ${appData.pais_destino === "Australia 🇦🇺" ? "selected":""}>Australia 🇦🇺</option>
-                            </select>
-                        </div>
-                        <div class="full-width">
-                            <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_purpose')}</label>
-                            <select id="selectMotivoViaje">
-                                <option value="">${t('select_default')}</option>
-                                <option value="${t('opt_tourism')}" ${appData.motivo_viaje === t('opt_tourism') ? "selected":""}>${t('opt_tourism')}</option>
-                                <option value="${t('opt_business')}" ${appData.motivo_viaje === t('opt_business') ? "selected":""}>${t('opt_business')}</option>
-                                <option value="${t('opt_study')}" ${appData.motivo_viaje === t('opt_study') ? "selected":""}>${t('opt_study')}</option>
-                                <option value="${t('opt_work')}" ${appData.motivo_viaje === t('opt_work') ? "selected":""}>${t('opt_work')}</option>
-                                <option value="${t('opt_other')}" ${appData.motivo_viaje === t('opt_other') ? "selected":""}>${t('opt_other')}</option>
                             </select>
                         </div>
                         <div class="button-group-desktop full-width">
@@ -906,7 +882,7 @@ function renderScreen(pasoForzado = null) {
                 html += `
                     <div class="full-width">
                         <label style="font-size:14px; font-weight:bold;">1. ${lang === 'en' ? 'Primary Purpose of Trip:' : 'Motivo Principal de Viaje:'}</label>
-                        <textarea id="pln_motivo">${d.motivo}</textarea>
+                        <textarea id="pln_motivo" placeholder="${lang === 'en' ? 'Tourism, business, medical...' : 'Turismo, negocios, estudios...'}">${d.motivo}</textarea>
                     </div>
                     <div>
                         <label style="font-size:14px; font-weight:bold;">2. ${lang === 'en' ? 'Estimated Arrival Date:' : 'Fecha Aproximada:'}</label>
@@ -1206,22 +1182,7 @@ function renderScreen(pasoForzado = null) {
 
 function guardarPaisInicial() {
     let selectPais = document.getElementById('selectPaisDestino');
-    let selectMotivo = document.getElementById('selectMotivoViaje');
-    
     if (selectPais) appData.pais_destino = selectPais.value;
-    
-    if (selectMotivo) {
-        let motivo = selectMotivo.value;
-        if (!motivo) { 
-            mostrarAlerta(t('msg_enter_required')); 
-            return; 
-        }
-        appData.motivo_viaje = motivo;
-        
-        if (!appData.respuestas_ds160['plan_viaje_combo']) {
-            appData.respuestas_ds160['plan_viaje_combo'] = JSON.stringify({motivo: motivo, fecha: "", tiempo: ""});
-        }
-    }
     
     avanzarPaso(1);
 }
@@ -1389,7 +1350,7 @@ function confirmarBorrado() {
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
     welcomeSubstep = 1;
-    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
 
@@ -1504,6 +1465,13 @@ function mostrarResumen() {
     
     let contentElem = document.getElementById('screenContent');
     if (contentElem) contentElem.innerHTML = pantallaFinal;
+}
+
+// Función global conectada al botón del selector del header
+function setLanguage(lang) {
+    appData.idioma = lang;
+    localStorage.setItem('datosVisado', JSON.stringify(appData));
+    renderScreen();
 }
 
 renderScreen();
