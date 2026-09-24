@@ -413,7 +413,6 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", 
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
-    motivo_viaje: "",
     folio_pasaporte: "", 
     ds160_index: 0, 
     respuestas_ds160: {}, 
@@ -824,9 +823,16 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "hijos_combo") {
+                // Escudo de retrocompatibilidad
                 let d = { num: 0, lista: [] };
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
-                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                    try { 
+                        let parsed = JSON.parse(respuestaPrevia); 
+                        if (parsed.lista) {
+                            d.num = parsed.num || 0;
+                            d.lista = parsed.lista;
+                        }
+                    } catch(e){} 
                 }
                 
                 html += `
@@ -853,6 +859,7 @@ function renderScreen(pasoForzado = null) {
                 html += `</div>`;
             }
             else if (q.tipo === "padres_combo") {
+                // Escudo de retrocompatibilidad
                 let d = {
                     padre_nombre: "", padre_fecha: "", padre_ocupacion: "",
                     madre_nombre: "", madre_fecha: "", madre_ocupacion: ""
@@ -864,7 +871,7 @@ function renderScreen(pasoForzado = null) {
                             d.padre_nombre = parsed.nombres;
                             d.padre_ocupacion = parsed.ocupacion;
                         } else {
-                            d = parsed;
+                            d = { ...d, ...parsed };
                         }
                     } catch(e){} 
                 }
@@ -990,8 +997,18 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "logistica_combo") {
+                // Escudo de retrocompatibilidad robusto
                 let d = { hospedaje: "", quienPaga: "", acompanantes_sino: "", acompanantes_lista: [], acompanantes_otros: "" };
-                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { try { d = JSON.parse(respuestaPrevia); } catch(e){} }
+                if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
+                    try { 
+                        let parsed = JSON.parse(respuestaPrevia); 
+                        d.hospedaje = parsed.hospedaje || "";
+                        d.quienPaga = parsed.quienPaga || "";
+                        d.acompanantes_sino = parsed.acompanantes_sino || "";
+                        d.acompanantes_lista = parsed.acompanantes_lista || [];
+                        d.acompanantes_otros = parsed.acompanantes_otros || parsed.acompanantes_det || parsed.acompanantes || "";
+                    } catch(e){} 
+                }
 
                 // Extraer datos del cónyuge
                 let esposoData = appData.respuestas_ds160['esposo_combo'];
@@ -1060,6 +1077,7 @@ function renderScreen(pasoForzado = null) {
                 `;
             }
             else if (q.tipo === "contactos_combo") {
+                // Escudo de retrocompatibilidad
                 let d = {
                     cercanos_sino: "", cercanos_det: "",
                     otros_sino: "", otros_det: "",
@@ -1067,7 +1085,10 @@ function renderScreen(pasoForzado = null) {
                 };
 
                 if(respuestaPrevia && respuestaPrevia.startsWith("{")) { 
-                    try { d = JSON.parse(respuestaPrevia); } catch(e){} 
+                    try { 
+                        let parsed = JSON.parse(respuestaPrevia);
+                        d = { ...d, ...parsed };
+                    } catch(e){} 
                 }
 
                 html += `
@@ -1337,6 +1358,7 @@ function renderScreen(pasoForzado = null) {
 function guardarPaisInicial() {
     let selectPais = document.getElementById('selectPaisDestino');
     if (selectPais) appData.pais_destino = selectPais.value;
+    
     avanzarPaso(1);
 }
 
@@ -1562,7 +1584,7 @@ function confirmarBorrado() {
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
     welcomeSubstep = 1;
-    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
 
