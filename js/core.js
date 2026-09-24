@@ -84,14 +84,16 @@ const i18n = {
         opt_yes: "Sí",
         opt_no: "No",
         disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
-        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. travel.state.gov).",
+        disclaimer_gov_desc: "Esta aplicación es una herramienta de asistencia independiente para organizar expedientes de viaje. NO representa, NO está afiliada y NO es respaldada por ninguna entidad gubernamental de ningún país.",
         btn_search_cp: "Buscar",
         select_purpose: "¿Cuál es el motivo principal de tu viaje?",
         opt_tourism: "Turismo / Vacaciones / Visita Médica",
         opt_business: "Negocios / Conferencias",
         opt_study: "Estudios / Intercambio",
         opt_work: "Trabajo / Empleo temporal",
-        opt_other: "Otro"
+        opt_other: "Otro",
+        accept_disclaimer: "Entiendo y acepto que esta aplicación es independiente y no pertenece a ningún gobierno.",
+        msg_accept_disclaimer: "Debes aceptar el aviso marcando la casilla para poder continuar."
     },
     en: {
         title: "Dossier160",
@@ -173,14 +175,16 @@ const i18n = {
         opt_yes: "Yes",
         opt_no: "No",
         disclaimer_gov_title: "⚠️ GOVERNMENT DISCLAIMER:",
-        disclaimer_gov_desc: "This app is an independent tool and DOES NOT represent, nor is it affiliated with, any government entity. Official visa information must be consulted directly on official government websites (e.g., travel.state.gov).",
+        disclaimer_gov_desc: "This app is an independent assistance tool for organizing travel dossiers. It DOES NOT represent, IS NOT affiliated with, and IS NOT endorsed by any government entity of any country.",
         btn_search_cp: "Search",
         select_purpose: "What is the primary purpose of your trip?",
         opt_tourism: "Tourism / Vacation / Medical Treatment",
         opt_business: "Business / Conferences",
         opt_study: "Study / Exchange",
         opt_work: "Work / Temporary Employment",
-        opt_other: "Other"
+        opt_other: "Other",
+        accept_disclaimer: "I understand and accept that this application is independent and does not belong to any government.",
+        msg_accept_disclaimer: "You must accept the disclaimer by checking the box to continue."
     }
 };
 
@@ -385,7 +389,7 @@ const PASOS_PRE_CUESTIONARIO = 5;
 const PASOS_POST_CUESTIONARIO = 8; 
 const TOTAL_PASOS = PASOS_PRE_CUESTIONARIO + cuestionarioBase.length + PASOS_POST_CUESTIONARIO; 
 
-// Variable local para controlar el sub-paso de la bienvenida sin romper los índices generales
+// Variable local para controlar el sub-paso de la bienvenida
 let welcomeSubstep = 1;
 
 let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
@@ -432,6 +436,15 @@ function cambiarIdioma(nuevoIdioma) {
         setLanguage(nuevoIdioma);
     }
     renderScreen();
+}
+
+function validarDisclaimer() {
+    let chk = document.getElementById('chk_disclaimer');
+    if (chk && chk.checked) {
+        avanzarSubPasoBienvenida(3);
+    } else {
+        mostrarAlerta(t('msg_accept_disclaimer'));
+    }
 }
 
 function obtenerNombrePaisLimpio(pais) {
@@ -590,15 +603,19 @@ function renderScreen(pasoForzado = null) {
                     </div>
                 `;
             } else if (welcomeSubstep === 2) {
-                // PASO 2: Aviso Gubernamental (Disclaimer)
+                // PASO 2: Aviso Gubernamental (Disclaimer) con Checkbox Obligatorio
                 html = `
                     <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">⚖️</div>
                     <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('disclaimer_gov_title')}</h2>
                     <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; color: #b71c1c; text-align: left;">
-                        <p style="margin: 0;">${t('disclaimer_gov_desc')}</p>
+                        <p style="margin: 0 0 15px 0;">${t('disclaimer_gov_desc')}</p>
+                        <label style="display: flex; align-items: flex-start; gap: 10px; font-weight: bold; cursor: pointer; background: #ffcdd2; padding: 10px; border-radius: 4px;">
+                            <input type="checkbox" id="chk_disclaimer" style="margin-top: 2px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>${t('accept_disclaimer')}</span>
+                        </label>
                     </div>
                     <div class="button-group-desktop" style="justify-content: center;">
-                        <button type="button" onclick="avanzarSubPasoBienvenida(3)">${t('btn_accept')}</button>
+                        <button type="button" onclick="validarDisclaimer()">${t('btn_accept')}</button>
                     </div>
                 `;
             } else if (welcomeSubstep === 3) {
