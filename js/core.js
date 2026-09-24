@@ -188,7 +188,6 @@ const i18n = {
     }
 };
 
-// Función Global para renderizar dinámicamente hijos
 window.generarCamposHijos = function(num, lang) {
     let container = document.getElementById('hij_container');
     if(!container) return;
@@ -206,7 +205,6 @@ window.generarCamposHijos = function(num, lang) {
     container.innerHTML = html;
 };
 
-// Cuestionario Base Bilingüe (Orden Actualizado: Plan de viaje es el #1)
 const cuestionarioBase = [
     { 
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
@@ -1647,6 +1645,41 @@ function mostrarResumen() {
     let lang = appData.idioma || "es";
     let paisActual = appData.pais_destino || "Estados Unidos 🇺🇸";
     let paisLimpio = obtenerNombrePaisLimpio(paisActual);
+
+    // Banderas Bilingües para Etiquetas de Resumen
+    let isEn = lang === 'en';
+    let lblName = isEn ? "Name:" : "Nombre:";
+    let lblDob = isEn ? "DOB:" : "Fecha Nac:";
+    let lblMun = isEn ? "Municipality:" : "Municipio:";
+    let lblOtherNat = isEn ? "Other Nationality:" : "Otra Nac:";
+    let lblPhones = isEn ? "Phones:" : "Tels:";
+    let lblSocial = isEn ? "Social Media:" : "Redes:";
+    let lblPrevContact = isEn ? "Other Phones/Emails (5 yrs):" : "Otros Tels/Emails (5 años):";
+    let lblSpouse = isEn ? "Spouse:" : "Cónyuge:";
+    let lblDegree = isEn ? "Degree:" : "Nivel:";
+    let lblMajor = isEn ? "Major:" : "Carrera:";
+    let lblSchools = isEn ? "Schools:" : "Escuelas:";
+    let lblCompany = isEn ? "Company/Institution:" : "Empresa/Institución:";
+    let lblAddress = isEn ? "Address & Phone:" : "Dirección y Teléfono:";
+    let lblJobTitle = isEn ? "Title:" : "Puesto:";
+    let lblYears = isEn ? "years" : "años";
+    let lblSalary = isEn ? "Salary:" : "Sueldo:";
+    let lblDuties = isEn ? "Duties:" : "Funciones:";
+    let lblPurpose = isEn ? "Purpose:" : "Motivo:";
+    let lblDate = isEn ? "Date:" : "Fecha:";
+    let lblPaying = isEn ? "Paying Party:" : "Quién Paga:";
+    let lblHousing = isEn ? "Accommodation:" : "Hospedaje:";
+    let lblWithOthers = isEn ? "Traveling Accompanied:" : "Viaja Acompañado:";
+    let lblCompanions = isEn ? "Companions:" : "Acompañantes:";
+    let lblCloseRel = isEn ? "Immediate relatives in destination:" : "Familiares cercanos en destino:";
+    let lblOtherRel = isEn ? "Other relatives:" : "Otros familiares:";
+    let lblIntTravel = isEn ? "International travel (5 yrs):" : "Viajes internacionales (5 años):";
+    let lblIssuePlace = isEn ? "Issuance Location:" : "Lugar de Emisión:";
+    let lblLostStolen = isEn ? "Lost/Stolen:" : "Robo/Extravío:";
+    let lblPrevVisa = isEn ? "Previous Visa:" : "Visa previa:";
+    let lblVisaStolen = isEn ? "Stolen/Canceled Visa:" : "Visa robada/cancelada:";
+    let lblVisaIssues = isEn ? "Issues/Refusal:" : "Problemas/Negada:";
+    let lblDetails = isEn ? "Details:" : "Detalle:";
     
     let txtWhats = `*===== ${t('summary_title').toUpperCase()} =====*\n`;
     txtWhats += `*${t('lbl_country').toUpperCase()}* ${paisLimpio}\n`;
@@ -1727,48 +1760,48 @@ function mostrarResumen() {
                 let obj = JSON.parse(valor);
                 
                 if (p && p.tipo === "nombre_nacimiento_combo") {
-                    valor = `Nombre: ${obj.nombreCompleto}\nFecha Nac: ${obj.fechaNacimiento}`;
+                    valor = `${lblName} ${obj.nombreCompleto}\n${lblDob} ${obj.fechaNacimiento}`;
                 } else if (p && p.tipo === "lugar_nacionalidad_combo") {
-                    valor = `Municipio: ${obj.municipio}\nOtra Nac: ${obj.nac_sino} (${obj.nac_det})`;
+                    valor = `${lblMun} ${obj.municipio}\n${lblOtherNat} ${obj.nac_sino} (${obj.nac_det})`;
                 } else if (p && p.tipo === "contacto_redes_combo") {
-                    valor = `Tels: ${obj.telefonos}\nRedes: ${obj.redes}\nOtros Tels/Emails (5 años): ${obj.prev_sino} (${obj.prev_det})`;
+                    valor = `${lblPhones} ${obj.telefonos}\n${lblSocial} ${obj.redes}\n${lblPrevContact} ${obj.prev_sino} (${obj.prev_det})`;
                 } else if (p && p.tipo === "esposo_combo") {
-                    valor = `Cónyuge: ${obj.nombre}\nNac: ${obj.fecha} (${obj.lugar})`;
+                    valor = `${lblSpouse} ${obj.nombre}\n${lblDob} ${obj.fecha} (${obj.lugar})`;
                 } else if (p && p.tipo === "hijos_combo") {
-                    if(obj.num === 0) valor = lang === 'en' ? `Children: 0` : `Hijos: 0`;
+                    if(obj.num === 0) valor = isEn ? `Children: 0` : `Hijos: 0`;
                     else {
-                        valor = (lang === 'en' ? `Number of children: ` : `Número de hijos: `) + `${obj.num}\n` + 
-                                obj.lista.map((h, i) => `${lang==='en'?'Child':'Hijo'} ${i+1}: ${h.nombre} (${h.fecha})`).join('\n');
+                        valor = (isEn ? `Number of children: ` : `Número de hijos: `) + `${obj.num}\n` + 
+                                obj.lista.map((h, i) => `${isEn?'Child':'Hijo'} ${i+1}: ${h.nombre} (${h.fecha})`).join('\n');
                     }
                 } else if (p && p.tipo === "padres_combo") {
-                    let tPadre = lang === 'en' ? 'Father' : 'Padre';
-                    let tMadre = lang === 'en' ? 'Mother' : 'Madre';
-                    let tNac = lang === 'en' ? 'DOB' : 'Nac';
-                    let tOcu = lang === 'en' ? 'Occ' : 'Ocup';
+                    let tPadre = isEn ? 'Father' : 'Padre';
+                    let tMadre = isEn ? 'Mother' : 'Madre';
+                    let tNac = isEn ? 'DOB' : 'Nac';
+                    let tOcu = isEn ? 'Occ' : 'Ocup';
                     valor = `[${tPadre}] ${obj.padre_nombre || obj.nombres || ''} | ${tNac}: ${obj.padre_fecha || ''} | ${tOcu}: ${obj.padre_ocupacion || obj.ocupacion || ''}\n[${tMadre}] ${obj.madre_nombre || ''} | ${tNac}: ${obj.madre_fecha || ''} | ${tOcu}: ${obj.madre_ocupacion || ''}`;
                 } else if (p && p.tipo === "educacion_combo") {
-                    valor = `Nivel: ${obj.nivel}\nCarrera: ${obj.especialidad}\nEscuelas: ${obj.escuelas}`;
+                    valor = `${lblDegree} ${obj.nivel}\n${lblMajor} ${obj.especialidad}\n${lblSchools} ${obj.escuelas}`;
                 } else if (p && p.tipo === "empresa_combo") {
-                    valor = `Empresa/Institución: ${obj.nombre}\nDirección y Teléfono: ${obj.direccion}`;
+                    valor = `${lblCompany} ${obj.nombre}\n${lblAddress} ${obj.direccion}`;
                 } else if (p && p.tipo === "puesto_combo") {
-                    valor = `Puesto: ${obj.puesto} (${obj.antiguedad} años)\nSueldo: ${obj.sueldo}\nFunciones: ${obj.funciones}`;
+                    valor = `${lblJobTitle} ${obj.puesto} (${obj.antiguedad} ${lblYears})\n${lblSalary} ${obj.sueldo}\n${lblDuties} ${obj.funciones}`;
                 } else if (p && p.tipo === "plan_viaje_combo") {
-                    valor = `Motivo: ${obj.motivo}\nFecha: ${obj.fecha} (${obj.tiempo})`;
+                    valor = `${lblPurpose} ${obj.motivo}\n${lblDate} ${obj.fecha} (${obj.tiempo})`;
                 } else if (p && p.tipo === "logistica_combo") {
-                    let text = `Quién Paga: ${obj.quienPaga}\nHospedaje: ${obj.hospedaje}\nViaja Acompañado: ${obj.acompanantes_sino}`;
+                    let text = `${lblPaying} ${obj.quienPaga}\n${lblHousing} ${obj.hospedaje}\n${lblWithOthers} ${obj.acompanantes_sino}`;
                     if (obj.acompanantes_sino === 'Sí' || obj.acompanantes_sino === 'Yes') {
                         let acmDetalles = [];
                         if (obj.acompanantes_lista && obj.acompanantes_lista.length > 0) acmDetalles.push(...obj.acompanantes_lista);
-                        if (obj.acompanantes_otros) acmDetalles.push(`Otros: ${obj.acompanantes_otros}`);
-                        text += `\nAcompañantes:\n- ` + acmDetalles.join('\n- ');
+                        if (obj.acompanantes_otros) acmDetalles.push(`${isEn?'Others':'Otros'}: ${obj.acompanantes_otros}`);
+                        text += `\n${lblCompanions}\n- ` + acmDetalles.join('\n- ');
                     }
                     valor = text;
                 } else if (p && p.tipo === "contactos_combo") {
-                    valor = `Familiares cercanos en destino: ${obj.cercanos_sino}\nDetalle: ${obj.cercanos_det}\nOtros familiares: ${obj.otros_sino}\nDetalle: ${obj.otros_det}\nViajes internacionales (5 años): ${obj.viajes_sino}\nDetalle: ${obj.viajes_det}`;
+                    valor = `${lblCloseRel} ${obj.cercanos_sino}\n${lblDetails} ${obj.cercanos_det}\n${lblOtherRel} ${obj.otros_sino}\n${lblDetails} ${obj.otros_det}\n${lblIntTravel} ${obj.viajes_sino}\n${lblDetails} ${obj.viajes_det}`;
                 } else if (p && p.tipo === "pasaporte_combo") {
-                    valor = `Lugar de Emisión: ${obj.lugarEmision}\nRobo/Extravío: ${obj.robo_sino}\nDetalle: ${obj.robo_det}`;
+                    valor = `${lblIssuePlace} ${obj.lugarEmision}\n${lblLostStolen} ${obj.robo_sino}\n${lblDetails} ${obj.robo_det}`;
                 } else if (p && p.tipo === "visas_historial_combo") {
-                    valor = `Visa previa: ${obj.otorgada_sino}\nDetalle: ${obj.otorgada_det}\nVisa robada/cancelada: ${obj.perdidarobada_sino}\nDetalle: ${obj.perdidarobada_det}\nProblemas/Negada: ${obj.problemas_sino}\nDetalle: ${obj.problemas_det}`;
+                    valor = `${lblPrevVisa} ${obj.otorgada_sino}\n${lblDetails} ${obj.otorgada_det}\n${lblVisaStolen} ${obj.perdidarobada_sino}\n${lblDetails} ${obj.perdidarobada_det}\n${lblVisaIssues} ${obj.problemas_sino}\n${lblDetails} ${obj.problemas_det}`;
                 } else {
                     valor = JSON.stringify(obj, null, 2);
                 }
@@ -1798,7 +1831,7 @@ function mostrarResumen() {
         `;
     }
     
-    htmlVista += `</div>`; // Cierra .resumen-grid
+    htmlVista += `</div>`;
 
     if(appData.cita_cas || appData.cita_entrevista) {
         htmlVista += `<div class="resumen-grid" style="margin-top: 15px;">`;
