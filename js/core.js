@@ -83,7 +83,15 @@ const i18n = {
         select_default: "Selecciona...",
         opt_yes: "Sí",
         opt_no: "No",
-        btn_search_cp: "Buscar"
+        disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
+        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. travel.state.gov).",
+        btn_search_cp: "Buscar",
+        select_purpose: "¿Cuál es el motivo principal de tu viaje?",
+        opt_tourism: "Turismo / Vacaciones / Visita Médica",
+        opt_business: "Negocios / Conferencias",
+        opt_study: "Estudios / Intercambio",
+        opt_work: "Trabajo / Empleo temporal",
+        opt_other: "Otro"
     },
     en: {
         title: "Dossier160",
@@ -164,7 +172,15 @@ const i18n = {
         select_default: "Select...",
         opt_yes: "Yes",
         opt_no: "No",
-        btn_search_cp: "Search"
+        disclaimer_gov_title: "⚠️ GOVERNMENT DISCLAIMER:",
+        disclaimer_gov_desc: "This app is an independent tool and DOES NOT represent, nor is it affiliated with, any government entity. Official visa information must be consulted directly on official government websites (e.g., travel.state.gov).",
+        btn_search_cp: "Search",
+        select_purpose: "What is the primary purpose of your trip?",
+        opt_tourism: "Tourism / Vacation / Medical Treatment",
+        opt_business: "Business / Conferences",
+        opt_study: "Study / Exchange",
+        opt_work: "Work / Temporary Employment",
+        opt_other: "Other"
     }
 };
 
@@ -373,6 +389,7 @@ let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", // Idioma por defecto
     paso_actual: 0, 
     pais_destino: "Estados Unidos 🇺🇸",
+    motivo_viaje: "",
     folio_pasaporte: "", 
     ds160_index: 0, 
     respuestas_ds160: {}, 
@@ -553,6 +570,11 @@ function renderScreen(pasoForzado = null) {
                     </div>
                 </div>
 
+                <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 12px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #b71c1c; text-align: left;">
+                    <p style="margin: 0 0 5px 0;"><b>${t('disclaimer_gov_title')}</b></p>
+                    <p style="margin: 0;">${t('disclaimer_gov_desc')}</p>
+                </div>
+
                 <div class="tip-box">
                     <p style="margin: 0 0 8px 0;"><b>${t('welcome_desc_title')}</b></p>
                     <p style="margin: 0;">${t('welcome_desc')}</p>
@@ -569,7 +591,18 @@ function renderScreen(pasoForzado = null) {
                             <option value="Australia 🇦🇺" ${appData.pais_destino === "Australia 🇦🇺" ? "selected":""}>Australia 🇦🇺</option>
                         </select>
                     </div>
-                    <div class="button-group-desktop">
+                    <div class="full-width">
+                        <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_purpose')}</label>
+                        <select id="selectMotivoViaje">
+                            <option value="">${t('select_default')}</option>
+                            <option value="${t('opt_tourism')}" ${appData.motivo_viaje === t('opt_tourism') ? "selected":""}>${t('opt_tourism')}</option>
+                            <option value="${t('opt_business')}" ${appData.motivo_viaje === t('opt_business') ? "selected":""}>${t('opt_business')}</option>
+                            <option value="${t('opt_study')}" ${appData.motivo_viaje === t('opt_study') ? "selected":""}>${t('opt_study')}</option>
+                            <option value="${t('opt_work')}" ${appData.motivo_viaje === t('opt_work') ? "selected":""}>${t('opt_work')}</option>
+                            <option value="${t('opt_other')}" ${appData.motivo_viaje === t('opt_other') ? "selected":""}>${t('opt_other')}</option>
+                        </select>
+                    </div>
+                    <div class="button-group-desktop full-width">
                         <button onclick="guardarPaisInicial()">${t('btn_start')}</button>
                     </div>
                 </div>
@@ -1123,8 +1156,24 @@ function renderScreen(pasoForzado = null) {
 }
 
 function guardarPaisInicial() {
-    let select = document.getElementById('selectPaisDestino');
-    if (select) appData.pais_destino = select.value;
+    let selectPais = document.getElementById('selectPaisDestino');
+    let selectMotivo = document.getElementById('selectMotivoViaje');
+    
+    if (selectPais) appData.pais_destino = selectPais.value;
+    
+    if (selectMotivo) {
+        let motivo = selectMotivo.value;
+        if (!motivo) { 
+            mostrarAlerta(t('msg_enter_required')); 
+            return; 
+        }
+        appData.motivo_viaje = motivo;
+        
+        if (!appData.respuestas_ds160['plan_viaje_combo']) {
+            appData.respuestas_ds160['plan_viaje_combo'] = JSON.stringify({motivo: motivo, fecha: "", tiempo: ""});
+        }
+    }
+    
     avanzarPaso(1);
 }
 
@@ -1290,7 +1339,7 @@ function confirmarBorrado() {
 
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
-    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
+    appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
 
