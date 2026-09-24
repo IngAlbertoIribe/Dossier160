@@ -206,7 +206,7 @@ window.generarCamposHijos = function(num, lang) {
     container.innerHTML = html;
 };
 
-// Cuestionario Base Bilingüe
+// Cuestionario Base Bilingüe (Orden Actualizado: Plan de viaje es el #1)
 const cuestionarioBase = [
     { 
         categoria: { es: "CONSULADO Y VIAJE", en: "TRAVEL & CONSULATE" }, 
@@ -1654,6 +1654,17 @@ function mostrarResumen() {
     
     let htmlVista = `
         <style>
+            .resumen-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 15px;
+            }
+            .full-width { grid-column: 1 / -1; }
+            .resumen-item {
+                border-bottom: 1px dashed #ccc;
+                padding-bottom: 6px;
+                margin-bottom: 10px;
+            }
             @media print {
                 body * { visibility: hidden; }
                 #areaImprimir, #areaImprimir * { visibility: visible; }
@@ -1669,17 +1680,41 @@ function mostrarResumen() {
                     margin: 0 !important;
                 }
                 .no-print { display: none !important; }
+                .resumen-grid {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    column-gap: 20px !important;
+                    row-gap: 5px !important;
+                }
+                .full-width { grid-column: 1 / -1 !important; }
+                .resumen-item {
+                    page-break-inside: avoid;
+                    border-bottom: 1px solid #eee !important;
+                    padding-bottom: 4px !important;
+                    margin-bottom: 0 !important;
+                }
+                .resumen-item p:first-child { font-size: 10px !important; color: #555 !important; }
+                .resumen-item p:last-child { font-size: 12px !important; line-height: 1.2 !important; }
+                h2 { font-size: 16px !important; margin-bottom: 10px !important; padding-bottom: 4px !important; }
+                h3 { font-size: 13px !important; padding: 4px 8px !important; margin-top: 10px !important; margin-bottom: 5px !important; }
             }
         </style>
-        <div class="resumen-header">
-            <h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px;">${t('summary_title')}</h2>
+        
+        <div class="full-width">
+            <h2 style="color:var(--color-primario); border-bottom: 2px solid var(--color-primario); padding-bottom:10px; margin-bottom: 15px;">${t('summary_title')}</h2>
         </div>
+        
+        <div class="resumen-grid">
+            <div class="resumen-item">
+                <p style="margin:0; font-size:12px; color:#555;"><b>${t('lbl_country')}</b> <span class="no-print" onclick="editarPasoDesdeResumen(0)" style="cursor:pointer; float:right;" title="Editar">✏️</span></p>
+                <p style="margin:0; font-size:14px; font-weight:bold; color:#000;">${paisLimpio}</p>
+            </div>
+            <div class="resumen-item">
+                <p style="margin:0; font-size:12px; color:#555;"><b>${t('lbl_passport_folio')}</b> <span class="no-print" onclick="editarPasoDesdeResumen(2)" style="cursor:pointer; float:right;" title="Editar">✏️</span></p>
+                <p style="margin:0; font-size:14px; font-weight:bold; color:#000;">${appData.folio_pasaporte}</p>
+            </div>
     `;
     
-    htmlVista += `<p><b>${t('lbl_country')}</b> ${paisLimpio} <span class="no-print" onclick="editarPasoDesdeResumen(0)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
-    htmlVista += `<p><b>${t('lbl_passport_folio')}</b> ${appData.folio_pasaporte} <span class="no-print" onclick="editarPasoDesdeResumen(2)" style="cursor:pointer;" title="Editar">✏️</span></p>`;
-    
-    htmlVista += `<div class="resumen-grid" style="margin-top: 20px;">`;
     let categoriaActual = "";
 
     for (const [clave, valorOrig] of Object.entries(appData.respuestas_ds160)) {
@@ -1710,7 +1745,7 @@ function mostrarResumen() {
                     let tMadre = lang === 'en' ? 'Mother' : 'Madre';
                     let tNac = lang === 'en' ? 'DOB' : 'Nac';
                     let tOcu = lang === 'en' ? 'Occ' : 'Ocup';
-                    valor = `[${tPadre}] ${obj.padre_nombre || obj.nombres} | ${tNac}: ${obj.padre_fecha || ''} | ${tOcu}: ${obj.padre_ocupacion || obj.ocupacion}\n[${tMadre}] ${obj.madre_nombre || ''} | ${tNac}: ${obj.madre_fecha || ''} | ${tOcu}: ${obj.madre_ocupacion || ''}`;
+                    valor = `[${tPadre}] ${obj.padre_nombre || obj.nombres || ''} | ${tNac}: ${obj.padre_fecha || ''} | ${tOcu}: ${obj.padre_ocupacion || obj.ocupacion || ''}\n[${tMadre}] ${obj.madre_nombre || ''} | ${tNac}: ${obj.madre_fecha || ''} | ${tOcu}: ${obj.madre_ocupacion || ''}`;
                 } else if (p && p.tipo === "educacion_combo") {
                     valor = `Nivel: ${obj.nivel}\nCarrera: ${obj.especialidad}\nEscuelas: ${obj.escuelas}`;
                 } else if (p && p.tipo === "empresa_combo") {
@@ -1745,7 +1780,7 @@ function mostrarResumen() {
             if(catTXT !== categoriaActual) {
                 categoriaActual = catTXT;
                 txtWhats += `\n*--- SECCIÓN: ${categoriaActual} ---*\n`;
-                htmlVista += `<h3 class="full-width" style="background:var(--color-acento); color:#fff; padding:6px; border-radius:4px; margin-top:15px; margin-bottom: 10px;">${categoriaActual}</h3>`;
+                htmlVista += `<h3 class="full-width" style="background:var(--color-acento); color:#fff; padding:6px 8px; border-radius:4px; margin-top:15px; margin-bottom: 5px;">${categoriaActual}</h3>`;
             }
         }
 
@@ -1753,28 +1788,41 @@ function mostrarResumen() {
         txtWhats += `*${preguntaTXT}*\n${valor}\n\n`;
         
         htmlVista += `
-            <div style="margin-bottom: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 8px;">
+            <div class="resumen-item">
                 <p style="margin:0; font-size:12px; color:#555;">
                     ${preguntaTXT}
                     <span class="no-print" onclick="editarPreguntaDesdeResumen('${clave}')" style="cursor:pointer; float:right;" title="Editar">✏️</span>
                 </p>
-                <p style="margin:0; font-size:15px; font-weight:bold; color:#000; white-space: pre-wrap;">${valor}</p>
+                <p style="margin:0; font-size:14px; font-weight:bold; color:#000; white-space: pre-wrap;">${valor}</p>
             </div>
         `;
     }
-    htmlVista += `</div>`;
+    
+    htmlVista += `</div>`; // Cierra .resumen-grid
 
-    if(appData.cita_cas) {
-        htmlVista += `<h3 style="color:var(--color-primario); margin-top:20px;">${t('lbl_biometrics_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(8)" style="cursor:pointer;">✏️</span></h3>
-                      <p><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b><br>${appData.cita_cas.lugar}</p>`;
-    }
-    if(appData.cita_entrevista) {
-        htmlVista += `<h3 style="color:var(--color-primario); margin-top:10px;">${t('lbl_consular_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(11)" style="cursor:pointer;">✏️</span></h3>
-                      <p><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b><br>${appData.cita_entrevista.lugar}</p>`;
+    if(appData.cita_cas || appData.cita_entrevista) {
+        htmlVista += `<div class="resumen-grid" style="margin-top: 15px;">`;
+        if(appData.cita_cas) {
+            htmlVista += `
+                <div class="resumen-item full-width">
+                    <h3 style="color:var(--color-primario); margin:0 0 5px 0; font-size:14px;">${t('lbl_biometrics_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(8)" style="cursor:pointer; float:right;">✏️</span></h3>
+                    <p style="margin:0; font-size:14px; color:#000;"><b>${appData.cita_cas.fecha} - ${appData.cita_cas.hora}</b> | ${appData.cita_cas.lugar}</p>
+                </div>
+            `;
+        }
+        if(appData.cita_entrevista) {
+            htmlVista += `
+                <div class="resumen-item full-width">
+                    <h3 style="color:var(--color-primario); margin:10px 0 5px 0; font-size:14px;">${t('lbl_consular_appt')} <span class="no-print" onclick="editarPasoDesdeResumen(11)" style="cursor:pointer; float:right;">✏️</span></h3>
+                    <p style="margin:0; font-size:14px; color:#000;"><b>${appData.cita_entrevista.fecha} - ${appData.cita_entrevista.hora}</b> | ${appData.cita_entrevista.lugar}</p>
+                </div>
+            `;
+        }
+        htmlVista += `</div>`;
     }
 
     htmlVista += `
-        <div style="margin-top: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; font-size: 11px; color: #555; text-align: justify; page-break-inside: avoid;">
+        <div class="full-width" style="margin-top: 25px; padding: 12px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; font-size: 10px; color: #555; text-align: justify; page-break-inside: avoid;">
             <strong>${t('disclaimer_gov_title')}</strong> ${t('disclaimer_gov_desc')}
         </div>
     `;
