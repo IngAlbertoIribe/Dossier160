@@ -84,7 +84,7 @@ const i18n = {
         opt_yes: "Sí",
         opt_no: "No",
         disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
-        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. travel.state.gov).",
+        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. https://travel.state.gov/en.html).",
         btn_search_cp: "Buscar",
         select_purpose: "¿Cuál es el motivo principal de tu viaje?",
         opt_tourism: "Turismo / Vacaciones / Visita Médica",
