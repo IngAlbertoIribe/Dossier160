@@ -84,7 +84,7 @@ const i18n = {
         opt_yes: "Sí",
         opt_no: "No",
         disclaimer_gov_title: "⚠️ AVISO GUBERNAMENTAL (DISCLAIMER):",
-        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. https://travel.state.gov/en.html).",
+        disclaimer_gov_desc: "Esta aplicación es una herramienta independiente y NO representa, ni está afiliada a ninguna entidad gubernamental. La información oficial para visas debe ser consultada directamente en sitios gubernamentales oficiales (ej. travel.state.gov).",
         btn_search_cp: "Buscar",
         select_purpose: "¿Cuál es el motivo principal de tu viaje?",
         opt_tourism: "Turismo / Vacaciones / Visita Médica",
@@ -385,6 +385,9 @@ const PASOS_PRE_CUESTIONARIO = 5;
 const PASOS_POST_CUESTIONARIO = 8; 
 const TOTAL_PASOS = PASOS_PRE_CUESTIONARIO + cuestionarioBase.length + PASOS_POST_CUESTIONARIO; 
 
+// Variable local para controlar el sub-paso de la bienvenida sin romper los índices generales
+let welcomeSubstep = 1;
+
 let appData = JSON.parse(localStorage.getItem('datosVisado')) || {
     idioma: "es", // Idioma por defecto
     paso_actual: 0, 
@@ -405,6 +408,21 @@ function t(key, replacements = {}) {
         text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
     }
     return text;
+}
+
+// Lógica de Bienvenida Dinámica
+function avanzarSubPasoBienvenida(paso) {
+    welcomeSubstep = paso;
+    renderScreen(0);
+}
+
+function setIdiomaBienvenida(lang) {
+    appData.idioma = lang;
+    localStorage.setItem('datosVisado', JSON.stringify(appData));
+    if (typeof setLanguage === 'function') {
+        setLanguage(lang);
+    }
+    avanzarSubPasoBienvenida(2);
 }
 
 function cambiarIdioma(nuevoIdioma) {
@@ -558,55 +576,69 @@ function renderScreen(pasoForzado = null) {
 
     switch(step) {
         case 0: 
-            html = `
-                <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✈️</div>
-                <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_title')}</h2>
-                
-                <div class="tip-box" style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_lang')}</label>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="button" class="${lang === 'es' ? 'success' : 'secondary'}" onclick="cambiarIdioma('es')">Español 🇲🇽</button>
-                        <button type="button" class="${lang === 'en' ? 'success' : 'secondary'}" onclick="cambiarIdioma('en')">English 🇺🇸</button>
+            if (welcomeSubstep === 1) {
+                // PASO 1: Selección de Idioma
+                html = `
+                    <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">🌐</div>
+                    <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_title')}</h2>
+                    <div class="tip-box" style="margin-bottom: 15px; text-align:center;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 15px;">Selecciona tu idioma / Select your language:</label>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button type="button" class="${lang === 'es' ? 'success' : 'secondary'}" onclick="setIdiomaBienvenida('es')">Español 🇲🇽</button>
+                            <button type="button" class="${lang === 'en' ? 'success' : 'secondary'}" onclick="setIdiomaBienvenida('en')">English 🇺🇸</button>
+                        </div>
                     </div>
-                </div>
+                `;
+            } else if (welcomeSubstep === 2) {
+                // PASO 2: Aviso Gubernamental (Disclaimer)
+                html = `
+                    <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">⚖️</div>
+                    <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('disclaimer_gov_title')}</h2>
+                    <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; color: #b71c1c; text-align: left;">
+                        <p style="margin: 0;">${t('disclaimer_gov_desc')}</p>
+                    </div>
+                    <div class="button-group-desktop" style="justify-content: center;">
+                        <button type="button" onclick="avanzarSubPasoBienvenida(3)">${t('btn_accept')}</button>
+                    </div>
+                `;
+            } else if (welcomeSubstep === 3) {
+                // PASO 3: Destino y Motivo de Viaje
+                html = `
+                    <div style="font-size: 48px; text-align: center; margin-bottom: 10px;">✈️</div>
+                    <h2 style="color: var(--color-primario); margin-top:0; text-align: center;">${t('welcome_desc_title')}</h2>
+                    
+                    <div class="tip-box" style="margin-bottom: 20px;">
+                        <p style="margin: 0;">${t('welcome_desc')}</p>
+                    </div>
 
-                <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 12px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #b71c1c; text-align: left;">
-                    <p style="margin: 0 0 5px 0;"><b>${t('disclaimer_gov_title')}</b></p>
-                    <p style="margin: 0;">${t('disclaimer_gov_desc')}</p>
-                </div>
-
-                <div class="tip-box">
-                    <p style="margin: 0 0 8px 0;"><b>${t('welcome_desc_title')}</b></p>
-                    <p style="margin: 0;">${t('welcome_desc')}</p>
-                </div>
-
-                <div class="form-grid-2">
-                    <div class="full-width">
-                        <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_country')}</label>
-                        <select id="selectPaisDestino">
-                            <option value="Estados Unidos 🇺🇸" ${appData.pais_destino === "Estados Unidos 🇺🇸" ? "selected":""}>Estados Unidos 🇺🇸</option>
-                            <option value="Canadá 🇨🇦" ${appData.pais_destino === "Canadá 🇨🇦" ? "selected":""}>Canadá 🇨🇦</option>
-                            <option value="Europa / Espacio Schengen 🇪🇺" ${appData.pais_destino === "Europa / Espacio Schengen 🇪🇺" ? "selected":""}>Europa / Espacio Schengen 🇪🇺</option>
-                            <option value="Japón 🇯🇵" ${appData.pais_destino === "Japón 🇯🇵" ? "selected":""}>Japón 🇯🇵</option>
-                            <option value="Australia 🇦🇺" ${appData.pais_destino === "Australia 🇦🇺" ? "selected":""}>Australia 🇦🇺</option>
-                        </select>
+                    <div class="form-grid-2">
+                        <div class="full-width">
+                            <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_country')}</label>
+                            <select id="selectPaisDestino">
+                                <option value="Estados Unidos 🇺🇸" ${appData.pais_destino === "Estados Unidos 🇺🇸" ? "selected":""}>Estados Unidos 🇺🇸</option>
+                                <option value="Canadá 🇨🇦" ${appData.pais_destino === "Canadá 🇨🇦" ? "selected":""}>Canadá 🇨🇦</option>
+                                <option value="Europa / Espacio Schengen 🇪🇺" ${appData.pais_destino === "Europa / Espacio Schengen 🇪🇺" ? "selected":""}>Europa / Espacio Schengen 🇪🇺</option>
+                                <option value="Japón 🇯🇵" ${appData.pais_destino === "Japón 🇯🇵" ? "selected":""}>Japón 🇯🇵</option>
+                                <option value="Australia 🇦🇺" ${appData.pais_destino === "Australia 🇦🇺" ? "selected":""}>Australia 🇦🇺</option>
+                            </select>
+                        </div>
+                        <div class="full-width">
+                            <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_purpose')}</label>
+                            <select id="selectMotivoViaje">
+                                <option value="">${t('select_default')}</option>
+                                <option value="${t('opt_tourism')}" ${appData.motivo_viaje === t('opt_tourism') ? "selected":""}>${t('opt_tourism')}</option>
+                                <option value="${t('opt_business')}" ${appData.motivo_viaje === t('opt_business') ? "selected":""}>${t('opt_business')}</option>
+                                <option value="${t('opt_study')}" ${appData.motivo_viaje === t('opt_study') ? "selected":""}>${t('opt_study')}</option>
+                                <option value="${t('opt_work')}" ${appData.motivo_viaje === t('opt_work') ? "selected":""}>${t('opt_work')}</option>
+                                <option value="${t('opt_other')}" ${appData.motivo_viaje === t('opt_other') ? "selected":""}>${t('opt_other')}</option>
+                            </select>
+                        </div>
+                        <div class="button-group-desktop full-width">
+                            <button onclick="guardarPaisInicial()">${t('btn_start')}</button>
+                        </div>
                     </div>
-                    <div class="full-width">
-                        <label style="font-weight: bold; display: block; margin-bottom: 8px;">${t('select_purpose')}</label>
-                        <select id="selectMotivoViaje">
-                            <option value="">${t('select_default')}</option>
-                            <option value="${t('opt_tourism')}" ${appData.motivo_viaje === t('opt_tourism') ? "selected":""}>${t('opt_tourism')}</option>
-                            <option value="${t('opt_business')}" ${appData.motivo_viaje === t('opt_business') ? "selected":""}>${t('opt_business')}</option>
-                            <option value="${t('opt_study')}" ${appData.motivo_viaje === t('opt_study') ? "selected":""}>${t('opt_study')}</option>
-                            <option value="${t('opt_work')}" ${appData.motivo_viaje === t('opt_work') ? "selected":""}>${t('opt_work')}</option>
-                            <option value="${t('opt_other')}" ${appData.motivo_viaje === t('opt_other') ? "selected":""}>${t('opt_other')}</option>
-                        </select>
-                    </div>
-                    <div class="button-group-desktop full-width">
-                        <button onclick="guardarPaisInicial()">${t('btn_start')}</button>
-                    </div>
-                </div>
-            `; 
+                `;
+            }
             break;
 
         case 1: 
@@ -1339,6 +1371,7 @@ function confirmarBorrado() {
 
 function ejecutarResetApp() { 
     localStorage.removeItem('datosVisado'); 
+    welcomeSubstep = 1;
     appData = { idioma: appData.idioma || "es", paso_actual:0, pais_destino:"Estados Unidos 🇺🇸", motivo_viaje:"", folio_pasaporte:"", ds160_index:0, respuestas_ds160:{}, cita_cas:null, cita_entrevista:null }; 
     renderScreen(0); 
 }
@@ -1454,13 +1487,6 @@ function mostrarResumen() {
     
     let contentElem = document.getElementById('screenContent');
     if (contentElem) contentElem.innerHTML = pantallaFinal;
-}
-
-// Función global conectada al botón del selector del header
-function setLanguage(lang) {
-    appData.idioma = lang;
-    localStorage.setItem('datosVisado', JSON.stringify(appData));
-    renderScreen();
 }
 
 renderScreen();
